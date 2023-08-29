@@ -40,14 +40,13 @@ private:
 	btVector3 init_pos = btVector3(0,0,0);
 	btQuaternion init_quat = btQuaternion(btVector3(0,0,1),0);
 
-	btDiscreteDynamicsWorld* dynamicsWorld;
 	GUIHelperInterface* guiHelper;
 
 	bool noShape = false;
 
 public:
 
-	Object(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*>* shapes, btTransform trans,
+	Object(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape*>* shapes, btTransform trans,
 	std::string filename, btVector4 color, float scaling, float mass, int colGroup, int colMask);
 	~Object(){}
 

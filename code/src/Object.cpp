@@ -23,15 +23,13 @@ Copyright (c) 2015 Google Inc. http://bulletphysics.org
 
 #include "Object.h"
 
-Object::Object(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*>* shapes, btTransform trans,
+Object::Object(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape*>* shapes, btTransform trans,
 	std::string filename, btVector4 color, float scaling, float mass, int colGroup, int colMask){
 
-	dynamicsWorld = world;
 	guiHelper = helper;
 	collisionGroup = colGroup;
 	collisionMask = colMask;
 
-    // add object to world
 	btVector3 obj_trans = trans.getOrigin();
 	btQuaternion obj_orient = trans.getRotation();
 	if(filename.compare("")!=0){

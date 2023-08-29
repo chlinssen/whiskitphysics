@@ -66,7 +66,7 @@ Rat::Rat(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObj
 
 	// define shape and body of head (mass=100)
 	btVector4 color = btVector4(0.1,0.1,0.1,1);
-	rathead = new Object(helper,world,shapes,headTransform,dir_rathead,color,SCALE/10,100.,COL_HEAD,headCollidesWith);
+	rathead = new Object(helper,shapes,headTransform,dir_rathead,color,SCALE/10,100.,COL_HEAD,headCollidesWith);
 
 	// create new Whiskers for this rat head
 	// origin: mean position of all basepoints
