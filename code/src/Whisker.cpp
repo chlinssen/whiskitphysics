@@ -219,7 +219,7 @@ void Whisker::initPhysics(btDiscreteDynamicsWorld* world, btRigidBody* head) {
         if(i==0){
              // initialize transforms and set frames at end of frustum
             btTransform frameInCurr = createFrame(btVector3(-(link_length/2.f),0,0));
-			btTransform  frameInPrev = rotZ(base_rot[0])*rotY(base_rot[1])*rotX(base_rot[2]);
+			btTransform frameInPrev = rotZ(base_rot[0])*rotY(base_rot[1])*rotX(base_rot[2]);
             baseConstraint = new btGeneric6DofSpringConstraint(*link_prev, *link, frameInPrev, frameInCurr,true);
 
             baseConstraint->setLinearLowerLimit(btVector3(0,0,0));
@@ -273,7 +273,6 @@ void Whisker::initPhysics(btDiscreteDynamicsWorld* world, btRigidBody* head) {
         }
 
         link_prev = link;
-
 	}
 }
 

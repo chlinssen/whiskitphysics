@@ -154,8 +154,6 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 
     btTransform trans = createFrame(position);
 	trans.setRotation(orientation);
-std::cout << "1111111111 222\n";
-
 
 	btCollisionShape* shape_compound = LoadShapeFromObj(fileName.c_str(), "", btVector3(scaling[0], scaling[1],scaling[2]));
 	shape_compound->setMargin(0.5);

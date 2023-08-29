@@ -55,7 +55,6 @@ void Simulation::load_parameters(Parameters& parameters) {
 	PEG_LOC = parameters["PEG_LOC"].as< std::vector< float > >();
 	PEG_SPEED = parameters["PEG_SPEED"].as< float >();
 	file_env = parameters["file_env"].as< std::string >();
-	std::cout <<"aefwefwef4\n";
 
 	// create rat
 	rat = new Rat(m_guiHelper,m_dynamicsWorld, &m_collisionShapes, parameters);
@@ -63,6 +62,12 @@ void Simulation::load_parameters(Parameters& parameters) {
 
 	vec = btVector3(0.5,-1,0).normalized();
 	const std::vector < std::string > whisker_names = parameters["WHISKER_NAMES"].as< std::vector< std::string > >();
+
+	std::cout << "Whiskers to simulate: ";
+	for (std::string s : whisker_names) {
+		std::cout << s << " ";
+	}
+	std::cout << std::endl;
 
 	data_dump->init(whisker_names);
 
@@ -139,7 +144,6 @@ void Simulation::stepSimulation(){
 	if(PRINT==2){
 		std::cout << "\rSimulation time: " << std::setprecision(2) << m_time << "s\tCompleted: " << std::setprecision(2) << m_time/TIME_STOP*100 << " %\tTime remaining: " << std::setprecision(4) << time_remaining/60 << " min " << std::setprecision(4) << (time_remaining % 60) << " s\n" << std::flush;
 	}
-
 }
 
 void Simulation::initPhysics()

@@ -279,6 +279,8 @@ int main(int argc, char** argv)
 			simulation->exitPhysics();
 
 			delete simulation;
+			delete app;
+			delete[] image;
 			std::cout << "Done." << std::endl;
 
 		}
