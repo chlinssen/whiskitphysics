@@ -1,0 +1,19 @@
+# parameters for the simulator
+DEBUG: false			# enable debug mode
+TIME_STEP: 0.001		# set time step, this is related to output video's FPS
+NUM_STEP_INT: 100		# internal time step
+TIME_STOP: 1.5		# set overall simulation time
+
+PRINT: 2			# set to PRINT=1 to kinematics/dynamics realtime, set to PRINT: 2 to print simulation time
+
+# output file
+SAVE: false			# save results to csv file
+dir_out: "../output/test"
+
+# camera visualization
+SAVE_VIDEO: false		# save video when running main_opengl.cpp
+file_video: "../output/video_test.mp4"
+CPOS: [0, 26, 20]		# set camera pos relative to rathead
+CDIST: 50		# set camera distance
+CPITCH: -89		# set camera pitch
+CYAW: 0		# set camera yaw

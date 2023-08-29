@@ -1,0 +1,12 @@
+# collision object type
+# 0: nothing
+# 1: peg
+# 2: wall
+# 3: create object from 3D scan
+OBJECT: 0
+
+# parameters for peg (OBJECT = 1)
+PEG_LOC: [20, 25, 0]
+PEG_SPEED: 10
+
+file_env: "data/environment/env_1.obj"
