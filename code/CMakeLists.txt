@@ -69,6 +69,11 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 
+# find YAML library
+find_package(yaml-cpp)
+MESSAGE("HMMM")
+
+
 # This is the shortcut to finding GLU, GLUT and OpenGL if they are properly installed on your system
 # This should be the case.
 
@@ -85,6 +90,7 @@ ENDIF (OPENGL_FOUND)
 IF (APPLE)
   FIND_LIBRARY(COCOA_LIBRARY Cocoa)
 ENDIF()
+
 
 FIND_PACKAGE(Boost COMPONENTS program_options filesystem REQUIRED)
 IF (Boost_FOUND)
@@ -127,17 +133,17 @@ SET(EXT_SOURCES
 )
 
 ADD_EXECUTABLE(
-	whiskit 
-	${SOURCES} 
-	${EXT_SOURCES} 
+	whiskit
+	${SOURCES}
+	${EXT_SOURCES}
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 
-    
+
 TARGET_LINK_LIBRARIES(whiskit
 	${CMAKE_DL_LIBS}
-	${Boost_LIBRARIES} 	
-	${OPENGL_gl_LIBRARY} 
+	${Boost_LIBRARIES}
+	${OPENGL_gl_LIBRARY}
     ${OPENGL_glu_LIBRARY}
     Bullet3Common
     BulletDynamics
@@ -146,7 +152,7 @@ TARGET_LINK_LIBRARIES(whiskit
     OpenGLWindow
     BulletExampleBrowserLib
     BulletExampleLib
-    
+
  )
 
 
@@ -197,10 +203,10 @@ ADD_EXECUTABLE(whiskit_gui
     ${CMAKE_SOURCE_DIR}/src/main_opengl.cpp
 )
 
-TARGET_LINK_LIBRARIES(whiskit_gui 
+TARGET_LINK_LIBRARIES(whiskit_gui
 	${CMAKE_DL_LIBS}
-	${Boost_LIBRARIES} 	
-	${OPENGL_gl_LIBRARY} 
+	${Boost_LIBRARIES}
+	${OPENGL_gl_LIBRARY}
     ${OPENGL_glu_LIBRARY}
     Bullet3Common
     BulletDynamics
@@ -209,7 +215,7 @@ TARGET_LINK_LIBRARIES(whiskit_gui
     OpenGLWindow
     BulletExampleBrowserLib
     BulletExampleLib
-    
+
  )
 
 

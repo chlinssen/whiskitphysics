@@ -31,54 +31,94 @@ btVector4 GREY = btVector4(0.,0.,0.0,0.5);
 btVector4 YELLOW = btVector4(1.,1.,0.0,1);
 btVector4 ORANGE = btVector4(1.,0.647,0.0,1);
 
+void Simulation::load_parameters(Parameters& parameters) {
+	TIME_STEP = parameters["TIME_STEP"].as< float >();
+	NUM_STEP_INT = parameters["NUM_STEP_INT"].as< int >();
+	TIME_STOP = parameters["TIME_STOP"].as< float >();
+	NO_WHISKERS = parameters["NO_WHISKERS"].as< bool >();
+	SAVE = parameters["SAVE"].as< bool >();
+	ACTIVE = parameters["ACTIVE"].as< bool >();
+	EXPLORING = parameters["EXPLORING"].as< bool >();
+	DEBUG = parameters["DEBUG"].as< bool >();
+
+	camPos = parameters["CPOS"].as< std::vector< float > >();
+	camDist = parameters["CDIST"].as< float >();
+	camPitch = parameters["CPITCH"].as< float >();
+	camYaw = parameters["CYAW"].as< float >();
+
+	file_whisking_angle = parameters["file_whisking_angle"].as< std::string >();
+	WHISKER_PARAMS_DIR = parameters["WHISKER_PARAMS_DIR"].as< std::string >();
+	dir_rathead_trajectory = parameters["dir_rathead_trajectory"].as< std::string >();
+
+	OBJECT = parameters["OBJECT"].as< int >();
+	PEG_LOC = parameters["PEG_LOC"].as< std::vector< float > >();
+	PEG_SPEED = parameters["PEG_SPEED"].as< float >();
+	file_env = parameters["file_env"].as< std::string >();
+
+	// create rat
+	rat = new Rat(m_guiHelper,m_dynamicsWorld, &m_collisionShapes, parameters);
+	btVector3 rathead_pos = rat->getPosition();
+
+	vec = btVector3(0.5,-1,0).normalized();
+	const std::vector < std::string > whisker_names = parameters["whisker_names"].as< std::vector< string > >();
+
+	data_dump->init(whisker_names);
+
+
+	// set camera position to rat head
+	camPos[0] = rathead_pos[0]+camPos[0];
+	camPos[1] = rathead_pos[1]+camPos[1];
+	camPos[2] = rathead_pos[2]+camPos[2];
+}
+
 void Simulation::stepSimulation(){
-	auto start = std::chrono::high_resolution_clock::now(); 
-	m_time += parameters->TIME_STEP; 								// increase time
+	auto start = std::chrono::high_resolution_clock::now();
+	m_time += TIME_STEP; 								// increase time
 	m_step += 1;													// increase step
-	
+
 	// run simulation as long as stop time not exceeded
-	if(parameters->TIME_STOP==0 || m_time < parameters->TIME_STOP){
+	if(TIME_STOP == 0 || m_time < TIME_STOP) {
 
 		// register collisions
-		scabbers->detect_collision(m_dynamicsWorld);
-		
-		// first, push back data into data_dump 
-		if(!parameters->NO_WHISKERS && parameters->SAVE){
-			scabbers->dump_M(data_dump);
-			scabbers->dump_F(data_dump);
-			scabbers->dump_Q(data_dump);
+		rat->detect_collision(m_dynamicsWorld);
+
+		// first, push back data into data_dump
+		if(!NO_WHISKERS && SAVE) {
+			rat->dump_M(data_dump);
+			rat->dump_F(data_dump);
+			rat->dump_Q(data_dump);
 		}
 
 		// moving object 1
-		if(parameters->OBJECT==1){
-			if(parameters->PEG_SPEED>0){
-				btVector3 velocity = parameters->PEG_SPEED * btVector3(0.4,-1,0).normalized();
+		if(OBJECT==1){
+			if(PEG_SPEED > 0){
+				btVector3 velocity = PEG_SPEED * btVector3(0.4,-1,0).normalized();
 				peg->setLinearVelocity(velocity);
-				
 			}
-			
 		}
 
 		// move array if in ACTIVE mode
-		if(parameters->ACTIVE && !parameters->NO_WHISKERS){
-			scabbers->whisk(m_step, parameters->WHISKER_VEL);
-			
+		if(ACTIVE && !NO_WHISKERS){
+			rat->whisk(m_step, whisker_vel);
 		}
-		
+
+
 		// move rat head if in EXPLORING mode
-		if(parameters->EXPLORING){
-			this_loc_vel = parameters->HEAD_LOC_VEL[m_step-1];
-			scabbers->setLinearVelocity(btVector3(this_loc_vel[3], this_loc_vel[4], this_loc_vel[5]/10));
-			// scabbers->setLinearVelocity(btVector3(0, 0, 0));
-			scabbers->setAngularVelocity(btVector3(this_loc_vel[6], this_loc_vel[7], this_loc_vel[8]));
-			// scabbers->setAngularVelocity(btVector3(0, 0, 0));
+		if(EXPLORING){
+			this_loc_vel = HEAD_LOC_VEL[m_step-1];
+			rat->setLinearVelocity(btVector3(this_loc_vel[3], this_loc_vel[4], this_loc_vel[5]/10));
+			// rat->setLinearVelocity(btVector3(0, 0, 0));
+			rat->setAngularVelocity(btVector3(this_loc_vel[6], this_loc_vel[7], this_loc_vel[8]));
+			// rat->setAngularVelocity(btVector3(0, 0, 0));
 		}
 
 		// step simulation
-		m_dynamicsWorld->stepSimulation(parameters->TIME_STEP,parameters->NUM_STEP_INT,parameters->TIME_STEP/parameters->NUM_STEP_INT);
+		m_dynamicsWorld->stepSimulation(TIME_STEP,
+		                                NUM_STEP_INT,
+										TIME_STEP / NUM_STEP_INT);
 
 		// draw debug if enabled
-	    if(parameters->DEBUG){
+	    if(DEBUG) {
 	    	m_dynamicsWorld->debugDrawWorld();
 	    }
 
@@ -89,29 +129,26 @@ void Simulation::stepSimulation(){
 		// timeout -> set exit flg
 		exitSim = 1;
 	}
-	
-	auto stop = std::chrono::high_resolution_clock::now(); 
+
+	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 	m_time_elapsed += duration.count()/1000.f;
 	auto factor = m_time_elapsed / m_time;
-	auto time_remaining = (int)((parameters->TIME_STOP - m_time) * (factor));
-	if(parameters->PRINT==2){
-		std::cout << "\rSimulation time: " << std::setprecision(2) << m_time << "s\tCompleted: " << std::setprecision(2) << m_time/parameters->TIME_STOP*100 << " %\tTime remaining: " << std::setprecision(4) << time_remaining/60 << " min " << std::setprecision(4) << (time_remaining % 60) << " s\n" << std::flush;
+	auto time_remaining = (int)((TIME_STOP - m_time) * (factor));
+	if(PRINT==2){
+		std::cout << "\rSimulation time: " << std::setprecision(2) << m_time << "s\tCompleted: " << std::setprecision(2) << m_time/TIME_STOP*100 << " %\tTime remaining: " << std::setprecision(4) << time_remaining/60 << " min " << std::setprecision(4) << (time_remaining % 60) << " s\n" << std::flush;
 	}
-    
+
 }
 
 void Simulation::initPhysics()
-{	
-	vec = btVector3(0.5,-1,0).normalized();
-	data_dump->init(parameters->WHISKER_NAMES);
-
+{
 	// set visual axis
 	m_guiHelper->setUpAxis(2);
 
 	// create empty dynamics world[0]
-	m_collisionConfiguration = new btDefaultCollisionConfiguration(); 
-    m_dispatcher = new	btCollisionDispatcher(m_collisionConfiguration); 
+	m_collisionConfiguration = new btDefaultCollisionConfiguration();
+    m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
 
     // broadphase algorithm
     m_broadphase = new btDbvtBroadphase();
@@ -120,7 +157,7 @@ void Simulation::initPhysics()
 	std::cout << "Using btSequentialImpulseConstraintSolver..." << std::endl;
 	m_solver = new btSequentialImpulseConstraintSolver();
 
-	m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration);			
+	m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration);
 
 	// set number of iterations
 	m_dynamicsWorld->getSolverInfo().m_numIterations = 20;
@@ -131,7 +168,7 @@ void Simulation::initPhysics()
 	m_dynamicsWorld->getSolverInfo().m_splitImpulse = true;
 	m_dynamicsWorld->getSolverInfo().m_erp = 0.8f;
 
-	
+
 	// set gravity
 	m_dynamicsWorld->setGravity(btVector3(0,0,0));
 
@@ -139,27 +176,27 @@ void Simulation::initPhysics()
 	m_guiHelper->createPhysicsDebugDrawer(m_dynamicsWorld);
 
 	if (m_dynamicsWorld->getDebugDrawer()){
-		if(parameters->DEBUG==1){
+		if(DEBUG==1){
 			std::cout << "DEBUG option 1: wireframes." << std::endl;
 			m_dynamicsWorld->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 		}
-		else if(parameters->DEBUG==2){
+		else if(DEBUG==2){
 			std::cout << "DEBUG option 2: constraints." << std::endl;
 			m_dynamicsWorld->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawConstraints);
 		}
-		else if(parameters->DEBUG==3){
+		else if(DEBUG==3){
 			std::cout << "DEBUG option 3: wireframes & constraints." << std::endl;
 			m_dynamicsWorld->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe+btIDebugDraw::DBG_DrawConstraintLimits);
 		}
-		else if(parameters->DEBUG==4){
+		else if(DEBUG==4){
 			std::cout << "DEBUG option 4: AAbb." << std::endl;
 			m_dynamicsWorld->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawAabb);
 		}
-		else if(parameters->DEBUG==5){
+		else if(DEBUG==5){
 			std::cout << "DEBUG option 5: Frammes." << std::endl;
 			m_dynamicsWorld->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawFrames);
 		}
-		else if(parameters->DEBUG==6){
+		else if(DEBUG==6){
 			std::cout << "DEBUG option 6: Only collision" << std::endl;
 			// m_dynamicsWorld->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawFrames);
 		}
@@ -169,24 +206,20 @@ void Simulation::initPhysics()
 		}
 	}
 
-	// add rat to world
-	scabbers = new Rat(m_guiHelper,m_dynamicsWorld, &m_collisionShapes, parameters);
-	btVector3 rathead_pos = scabbers->getPosition();
-	
 	// create object to collide with
 	// peg
-	if(parameters->OBJECT==1){
+	if(OBJECT==1){
 		btCollisionShape* pegShape = new btCylinderShapeZ(btVector3(1,1,80));
 		pegShape->setMargin(0.1);
 		m_collisionShapes.push_back(pegShape);
-		btTransform trans = createFrame(parameters->PEG_LOC,btVector3(0, 0, 0));
+		btTransform trans = createFrame(btVector3(PEG_LOC[0], PEG_LOC[1], PEG_LOC[2]),btVector3(0, 0, 0));
 		peg = createDynamicBody(1,0.5,trans, pegShape, m_guiHelper,  BLUE);
 		m_dynamicsWorld->addRigidBody(peg,COL_ENV,envCollidesWith);
 		peg->setActivationState(DISABLE_DEACTIVATION);
-		
+
 	}
 	// create object to collide with wall
-	else if(parameters->OBJECT==2){
+	else if(OBJECT==2){
 		btCollisionShape* wallShape = new btBoxShape(btVector3(5,200,60));
 		wallShape->setMargin(0.1);
 		m_collisionShapes.push_back(wallShape);
@@ -195,42 +228,35 @@ void Simulation::initPhysics()
 		m_dynamicsWorld->addRigidBody(wall,COL_ENV,envCollidesWith);
 	}
 	// create object from 3D scan
-	else if(parameters->OBJECT==3){
+	else if(OBJECT==3){
 		// add environment to world
 		btVector4 envColor = btVector4(0.6,0.6,0.6,1);
-		env = new Object(m_guiHelper,m_dynamicsWorld, &m_collisionShapes,btTransform(),parameters->file_env,envColor,btScalar(SCALE),btScalar(0),COL_ENV,envCollidesWith);
+		env = new Object(m_guiHelper,m_dynamicsWorld, &m_collisionShapes,btTransform(),file_env,envColor,btScalar(SCALE),btScalar(0),COL_ENV,envCollidesWith);
 	}
-	
+
 	// generate graphics
 	m_guiHelper->autogenerateGraphicsObjects(m_dynamicsWorld);
 
-	// set camera position to rat head
-	camPos[0] = rathead_pos[0]+parameters->CPOS[0];
-	camPos[1] = rathead_pos[1]+parameters->CPOS[1];
-	camPos[2] = rathead_pos[2]+parameters->CPOS[2];
-	camDist = parameters->CDIST;
-	camPitch = parameters->CPITCH;
-	camYaw = parameters->CYAW;
 	resetCamera();
 
 	// if active whisking, load whisking protraction angle trajectory
-	if (parameters->ACTIVE){
-		read_csv_float(parameters->dir_param + parameters->file_whisking_angle, parameters->WHISKER_VEL);
-		parameters->TIME_STOP = std::min(parameters->TIME_STOP, (parameters->WHISKER_VEL[0].size()/3 - 1) * parameters->TIME_STEP);
+	if (ACTIVE) {
+		const std::string dir_param = WHISKER_PARAMS_DIR;
+
+		read_csv_float(dir_param + file_whisking_angle, whisker_vel);
+		TIME_STOP = std::min(TIME_STOP, (whisker_vel[0].size()/3 - 1) * TIME_STEP);
 	}
 
 	// if exploring, load data for rat head trajectory
-	if (parameters->EXPLORING){
-		read_csv_float(parameters->dir_rathead_trajectory, parameters->HEAD_LOC_VEL);
+	if (EXPLORING){
+		read_csv_float(dir_rathead_trajectory, HEAD_LOC_VEL);
 	}
-
-	
 
 	// initialize time/step tracker
 	m_time_elapsed = 0;
 	m_time = 0;
 	m_step = 0;
-	
+
 	std::cout << "\n\nStart simulation..." << std::endl;
 	std::cout << "\n====================================================\n" << std::endl;
 }
@@ -239,6 +265,6 @@ output* Simulation::get_results(){
 	return data_dump;
 }
 
-void Simulation::resetCamera(){	
+void Simulation::resetCamera(){
 	m_guiHelper->resetCamera(camDist,camYaw,camPitch,camPos[0],camPos[1],camPos[2]);
 }

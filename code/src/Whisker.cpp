@@ -19,31 +19,35 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Whisker.h"
 
-Whisker::Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* helper,btAlignedObjectArray<btCollisionShape*>* shapes, std::string w_name, Parameters* parameters){
+
+Whisker::Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* helper, btAlignedObjectArray< btCollisionShape* >* shapes, std::string w_name, Parameters& parameters, btRigidBody* head, btTransform head2origin) {
 	color = btVector4(0.1, 0.1, 0.1, 1);
+
 	// save parameters and global variables to whisker object
 	m_collisionShapes = shapes;	// shape vector pointer
 	m_dynamicsWorld = world;	// simulation world pointer
 	m_guiHelper = helper;		// gui helper pointer
 
-	friction = 0.5;
 	m_angle = 0.;		// initialize protraction angle
 	m_time = 0;			// initialize time
-	ACTIVE = parameters->ACTIVE;
-	NO_MASS = parameters->NO_MASS;
-	BLOW = parameters->BLOW;
-	PRINT = parameters->PRINT;
-	dt = parameters->TIME_STEP;
-	NUM_LINKS = parameters->NUM_LINKS;
+
+	ACTIVE = parameters["ACTIVE"].as< bool >();
+	NO_MASS = parameters["NO_MASS"].as< bool >();
+	BLOW = parameters["BLOW"].as< bool >();
+	PRINT = parameters["PRINT"].as< bool >();
+	NUM_LINKS = parameters["NUM_LINKS"].as< unsigned int >();
+	const double base_stiffness = parameters["base_stiffness"].as< double >();
 	NUM_JOINTS = NUM_LINKS - 1;
 
 	// initialize collide array
 	std::vector<int> all_zeros(NUM_LINKS, 0);
 	collide = all_zeros;
-	dphi = {0.398f,0.591f,0.578f,0.393f,0.217f};
-	dzeta = {-0.9f,-0.284f,0.243f,0.449f, 0.744f};
 
-	//Whisker specific configuration parameters					// unit:
+	// set global settings
+	friction = parameters["friction"].as< double >();
+	dt = parameters["TIME_STEP"].as< double >();
+
+	// Whisker specific configuration parameters					// unit:
 	whisker_config config = get_config(w_name, parameters);
 	idx = config.index;
 	side = config.side;											// -
@@ -59,14 +63,11 @@ Whisker::Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* helper,btAl
 	base_rot = config.base_rot;									// -
 
 	//Whisker universal configuration parameters
-	rho = parameters->RHO_BASE/pow(SCALE,3);	// rho: density, SCALE: convert kg/m3 to kg/mm3
-	rho_slope = ((parameters->RHO_TIP-parameters->RHO_BASE)/length /pow(SCALE,3)) ;
-	zeta = parameters->ZETA;				// zeta: damping ratio
-	E = parameters->E/SCALE;			// E: Young's modulus, SCALE: convert kg/m/s2 to kg/mm/s2 
-}
+	rho = parameters["RHO_BASE"].as< double > () / pow(SCALE,3);	// rho: density, SCALE: convert kg/m3 to kg/mm3
+	rho_slope = ((parameters["RHO_TIP"].as< double >() - parameters["RHO_BASE"].as< double >())/length / pow(SCALE,3)) ;
+	zeta = parameters["ZETA"].as< double >();				// zeta: damping ratio
+	E = parameters["E"].as< double >() / SCALE;			// E: Young's modulus, SCALE: convert kg/m/s2 to kg/mm/s2
 
-
-void Whisker::buildWhisker(btRigidBody* head, btTransform head2origin){
 	/// CREATE BASE POINT
 	/// This is a box shape that is only translated from origin to basepoint location.
 	/// It's body frame is global axis-aligned.
@@ -120,8 +121,8 @@ void Whisker::buildWhisker(btRigidBody* head, btTransform head2origin){
 	btVector3 lowerLimit;
 	btVector3 upperLimit;
 	// if in ACTIVE mode, use dynamic range
-	if (ACTIVE) {	
-		if(!side){ 
+	if (ACTIVE) {
+		if(!side){
 			lowerLimit = btVector3(-PI/6.f,-PI/6.f,-PI/6.f);
 			upperLimit = btVector3(PI/3.f,PI/3.f,PI/3.f);
 		}
@@ -152,8 +153,9 @@ void Whisker::buildWhisker(btRigidBody* head, btTransform head2origin){
 	// BUILD WHISKER
 	btScalar radius;
     btScalar radius_next = radius_base;
-    btRigidBody* link_prev = base; 
-    for(int i=0;i< NUM_LINKS;++i) {
+    btRigidBody* link_prev = base;
+
+    for(unsigned int i=0;i< NUM_LINKS;++i) {
 
         radius = radius_next;
         radius_next = radius - link_length * radius_slope;
@@ -181,7 +183,7 @@ void Whisker::buildWhisker(btRigidBody* head, btTransform head2origin){
 
         // set position and rotation of current unit
         btTransform prevTransform = link_prev->getCenterOfMassTransform();
-        
+
         btTransform totalTransform;
         if(i==0){
             btTransform rotTransform = rotZ(base_rot[0])*rotY(base_rot[1])*rotX(base_rot[2]);
@@ -197,10 +199,10 @@ void Whisker::buildWhisker(btRigidBody* head, btTransform head2origin){
 
         // add unit to whisker and world
         btRigidBody* link = createDynamicBody(mass,friction,totalTransform,linkShape,m_guiHelper,color,0);
-        whisker.push_back(link);	
-        
-        if(side){ 
-            m_dynamicsWorld->addRigidBody(link,COL_ARRAY_R,arrayRCollidesWith); 
+        whisker.push_back(link);
+
+        if(side){
+            m_dynamicsWorld->addRigidBody(link,COL_ARRAY_R,arrayRCollidesWith);
         }
         else{
             m_dynamicsWorld->addRigidBody(link,COL_ARRAY_L,arrayLCollidesWith);
@@ -208,23 +210,23 @@ void Whisker::buildWhisker(btRigidBody* head, btTransform head2origin){
         link->setUserPointer(&collide[i]);
         link->setActivationState(DISABLE_DEACTIVATION);
 
-		
+
         if(i==0){
              // initialize transforms and set frames at end of frustum
             btTransform frameInCurr = createFrame(btVector3(-(link_length/2.f),0,0));
 			btTransform  frameInPrev = rotZ(base_rot[0])*rotY(base_rot[1])*rotX(base_rot[2]);
             baseConstraint = new btGeneric6DofSpringConstraint(*link_prev, *link, frameInPrev, frameInCurr,true);
-			
+
             baseConstraint->setLinearLowerLimit(btVector3(0,0,0));
             baseConstraint->setLinearUpperLimit(btVector3(0,0,0));
             baseConstraint->setAngularLowerLimit(btVector3(0,0,0));
             baseConstraint->setAngularUpperLimit(btVector3(0,0,0));
-            
+
             m_dynamicsWorld->addConstraint(baseConstraint,true);
             baseConstraint->setDbgDrawSize(btScalar(0.5f));
-			
+
 			baseConstraint->enableSpring(4,true);
-			baseConstraint->setStiffness(4,1.25);
+			baseConstraint->setStiffness(4, base_stiffness);
 			baseConstraint->setDamping(4,0.2);
 			baseConstraint->setEquilibriumPoint(4,0);
 
@@ -239,12 +241,12 @@ void Whisker::buildWhisker(btRigidBody* head, btTransform head2origin){
         else{
             btTransform frameInPrev = createFrame(btVector3(link_length/2.f,0,0),btVector3(0,0,0));
 		    btTransform frameInCurr = createFrame(btVector3(-link_length/2.f,0,0),btVector3(0,0,0));
-        
+
             // create link (between links) constraint
             btGeneric6DofSpringConstraint* spring = new btGeneric6DofSpringConstraint(*link_prev, *link, frameInPrev,frameInCurr,true);
 
             // set spring parameters of node
-            // ----------------------------------------------------------		
+            // ----------------------------------------------------------
             spring->setLinearLowerLimit(btVector3(0,0,0)); // lock the links
             spring->setLinearUpperLimit(btVector3(0,0,0));
             spring->setAngularLowerLimit(btVector3(0.,1.,1.)); // lock angles between links at x axis but free around y and z axis
@@ -264,17 +266,17 @@ void Whisker::buildWhisker(btRigidBody* head, btTransform head2origin){
             spring->setDamping(5,damping);
             spring->setEquilibriumPoint(5,-angle);
         }
-		
+
         link_prev = link;
 
-	} 
+	}
 }
 
 void Whisker::whisk(btScalar a_vel_0, btScalar a_vel_1, btScalar a_vel_2, btVector3 headAngularVelocity){
 	// localAngularVelocity is the velocity relative to the rat head
 	btVector3 localAngularVelocity = btVector3(a_vel_0, a_vel_1, a_vel_2);
 	btVector3 globalAngularVelocity = localAngularVelocity + headAngularVelocity;
-	base->setAngularVelocity(globalAngularVelocity);	
+	base->setAngularVelocity(globalAngularVelocity);
 }
 
 btRigidBody* Whisker::get_unit(int idx) const{
@@ -381,20 +383,7 @@ btVector3 Whisker::getPosition(int linknr){
 	return whisker[linknr]->getCenterOfMassPosition();
 }
 
-// function to get zeta angle of whisker motion (depends on row)
-float Whisker::get_dzeta(int index) const{
-
-	return dzeta[index];
-}
-
-// function to get phi angle of whisker motion (depends on row)
-float Whisker::get_dphi(int index) const{
-
-	return dphi[index];
-}
-
-
-btScalar Whisker::calc_base_radius(int row, int col, btScalar S) const{  
+btScalar Whisker::calc_base_radius(int row, int col, btScalar S) const{
 	// unit: mm
     btScalar dBase = 0.041 + 0.002*S + 0.011*row - 0.0039*col;
     return dBase/2;
@@ -416,14 +405,14 @@ btScalar Whisker::calc_slope(btScalar S, btScalar rbase, int row, int col) const
 
 
 btScalar Whisker::calc_mass(btScalar length, btScalar R, btScalar r, btScalar rho) const{
-        
-    btScalar m = rho*(PI*length/3)*(pow(R,2) + R*r + pow(r,2));    
+
+    btScalar m = rho*(PI*length/3)*(pow(R,2) + R*r + pow(r,2));
     return m;
 }
 
 btScalar Whisker::calc_inertia(btScalar radius) const{
-	
-	btScalar I = 0.25*PI*pow(radius,4);		
+
+	btScalar I = 0.25*PI*pow(radius,4);
     return I;
 }
 
@@ -445,17 +434,18 @@ btScalar Whisker::calc_stiffness(btScalar E, btScalar I, btScalar length) const{
 
 
 btScalar Whisker::calc_damping(btScalar k, btScalar M, btScalar CoM, btScalar zeta, btScalar dt) const{
-    
+
     btScalar actual_damp = zeta * 2 * CoM * sqrt(k * M);
     btScalar offset = CoM*CoM*M/dt;
-    btScalar c = dt/(offset+actual_damp);   
+    btScalar c = dt/(offset+actual_damp);
     return c;
 }
 
 // function to obtain parameters for specific whisker
-whisker_config Whisker::get_config(std::string wname,Parameters* parameters){
-    
+whisker_config Whisker::get_config(std::string wname,Parameters& parameters){
+
     boost::filesystem::path full_path(boost::filesystem::current_path());
+
     // read in parameter file
     std::vector<std::string> whisker_names;
     std::vector<std::vector<int>> whisker_pos;
@@ -463,21 +453,21 @@ whisker_config Whisker::get_config(std::string wname,Parameters* parameters){
     std::vector<std::vector<float>> whisker_angles;
     std::vector<std::vector<float>> whisker_bp_coor;
     std::vector<std::vector<float>> whisker_bp_angles;
-	
-	parameters->dir_param = parameters->MODEL_TYPE?"../data/whisker_param_model_rat/":"../data/whisker_param_average_rat/";
-	std::cout << "Loading whisker parameters from:  " << parameters->dir_param << " (MODEL_TYPE = " << parameters->MODEL_TYPE << ") " << std::endl;
-    read_csv_string(parameters->dir_param + "param_name.csv",whisker_names);
-    read_csv_int(parameters->dir_param +"param_side_row_col.csv",whisker_pos);
-    read_csv_float(parameters->dir_param +"param_s_a.csv",whisker_geom);
-    read_csv_float(parameters->dir_param +"param_angles.csv",whisker_angles);
-    read_csv_float(parameters->dir_param +"param_bp_pos.csv",whisker_bp_coor);
-    read_csv_float(parameters->dir_param + parameters->file_whisking_init_angle,whisker_bp_angles);
-    
+
+	const std::string dir_param = parameters["WHISKER_PARAMS_DIR"].as< std::string >();
+	std::cout << "Loading whisker parameters from:  " << dir_param << std::endl;
+    read_csv_string(dir_param + "param_name.csv",whisker_names);
+    read_csv_int(dir_param +"param_side_row_col.csv",whisker_pos);
+    read_csv_float(dir_param +"param_s_a.csv",whisker_geom);
+    read_csv_float(dir_param +"param_angles.csv",whisker_angles);
+    read_csv_float(dir_param +"param_bp_pos.csv",whisker_bp_coor);
+    read_csv_float(dir_param + parameters["file_whisking_init_angle"].as< std::string >(), whisker_bp_angles);
+
 	// find parameters for specific whiskers from "data"
 	whisker_config wc;
 	int wfound = 0;
     for(int i=0;i<whisker_names.size();i++){
-		
+
         if(!wname.compare(whisker_names[i])){
 			wc.index = i;
             wc.id = wname;
@@ -491,7 +481,7 @@ whisker_config Whisker::get_config(std::string wname,Parameters* parameters){
 			wfound = 1;
             break;
         }
-		
+
     }
 	if (!wfound){
 		std::cout << "\n======== ABORT SIMULATION ========" << std::endl;
@@ -499,5 +489,5 @@ whisker_config Whisker::get_config(std::string wname,Parameters* parameters){
 		exit (EXIT_FAILURE);
 	}
     return wc;
-    
+
 }

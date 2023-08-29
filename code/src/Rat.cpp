@@ -19,33 +19,73 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Rat.h"
 
-Rat::Rat(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*>* shapes, Parameters* parameters){
+
+Rat::Rat(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*>* shapes, Parameters& parameters){
+	load_parameters(parameters);
+
+	const std::vector< float > RATHEAD_LOC = parameters["RATHEAD_LOC"].as< std::vector< float > >();
+	const std::vector< float > RATHEAD_ORIENT = parameters["RATHEAD_ORIENT"].as< std::vector< float > >();
+	const std::string dir_rathead = parameters["dir_rathead"].as< std::string >();
+
+	std::vector < std::string > whisker_names = parameters["whisker_names"].as< std::vector< string > >();
+
+	if (whisker_names[0] == "ALL") {
+		whisker_names = {
+			"LA0","LA1","LA2","LA3","LA4",
+			"LB0","LB1","LB2","LB3","LB4",
+			"LC0","LC1","LC2","LC3","LC4","LC5",
+			"LD0","LD1","LD2","LD3","LD4","LD5",
+			"LE1","LE2","LE3","LE4","LE5",
+			"RA0","RA1","RA2","RA3","RA4",
+			"RB0","RB1","RB2","RB3","RB4",
+			"RC0","RC1","RC2","RC3","RC4","RC5",
+			"RD0","RD1","RD2","RD3","RD4","RD5",
+			"RE1","RE2","RE3","RE4","RE5"};
+	}
+	else if (whisker_names[0] == "R") {
+		whisker_names = {
+
+			"RA0","RA1","RA2","RA3","RA4",
+			"RB0","RB1","RB2","RB3","RB4",
+			"RC0","RC1","RC2","RC3","RC4","RC5",
+			"RD0","RD1","RD2","RD3","RD4","RD5",
+			"RE1","RE2","RE3","RE4","RE5"};
+	}
+	else if (whisker_names[0] == "L") {
+		whisker_names = {
+			"LA0","LA1","LA2","LA3","LA4",
+			"LB0","LB1","LB2","LB3","LB4",
+			"LC0","LC1","LC2","LC3","LC4","LC5",
+			"LD0","LD1","LD2","LD3","LD4","LD5",
+			"LE1","LE2","LE3","LE4","LE5"};
+	}
+
+
 	// set initial position and orientation of rat head
-	btVector3 position = btVector3(parameters->RATHEAD_LOC[0],parameters->RATHEAD_LOC[1],parameters->RATHEAD_LOC[2]);
-	btVector3 orientation = btVector3(parameters->RATHEAD_ORIENT[0],parameters->RATHEAD_ORIENT[1],parameters->RATHEAD_ORIENT[2]);
-	
+	btVector3 position = btVector3(RATHEAD_LOC[0], RATHEAD_LOC[1], RATHEAD_LOC[2]);
+	btVector3 orientation = btVector3(RATHEAD_ORIENT[0], RATHEAD_ORIENT[1], RATHEAD_ORIENT[2]);
+
 	// create transform for ratHead
 	btTransform headTransform = createFrame(position, orientation);
-	
+
 	// define shape and body of head (mass=100)
 	btVector4 color = btVector4(0.1,0.1,0.1,1);
-	rathead = new Object(helper,world,shapes,headTransform,parameters->dir_rathead,color,SCALE/10,100.,COL_HEAD,headCollidesWith);
-	
+	rathead = new Object(helper,world,shapes,headTransform,dir_rathead,color,SCALE/10,100.,COL_HEAD,headCollidesWith);
+
 	// set rathead->body to active state
 	rathead->body->setActivationState(DISABLE_DEACTIVATION);
 
 	// create new Whiskers for this rat head
-	// origin: mean possition of all basepoints
+	// origin: mean position of all basepoints
 	btTransform head2origin = createFrame(originOffset,originOrientation);
+
 	// create Whiskers
-	if(!parameters->NO_WHISKERS){
-		for(int w=0;w<parameters->WHISKER_NAMES.size();w++){
-			Whisker* whisker = new Whisker(world, helper, shapes, parameters->WHISKER_NAMES[w], parameters);
-			whisker->buildWhisker(rathead->body, head2origin);
+	if(!parameters["NO_WHISKERS"].as< bool >()) {
+		for(int w=0;w<whisker_names.size();w++){
+			Whisker* whisker = new Whisker(world, helper, shapes, whisker_names[w], parameters, rathead->body, head2origin);
 			m_whiskerArray.push_back(whisker);
 		}
 	}
-			
 }
 
 btAlignedObjectArray<Whisker*> Rat::getArray(){
@@ -84,7 +124,7 @@ const btVector3 Rat::getAngularVelocity(){
 void Rat::whisk(int step, std::vector<std::vector<float>> whisker_vel){
 	// total number of steps in one cycle of whisking phase
 	int totalStep = whisker_vel[0].size()/3;
-	
+
 	// for every whisker, read its angular velocity at this step
 	for (int i=0;i<m_whiskerArray.size();i++){
 		int idx = m_whiskerArray[i]->idx;
@@ -115,7 +155,7 @@ void Rat::dump_M(output* data){
 
 // function to retrieve forces at base points
 void Rat::dump_F(output* data){
-	
+
 	std::vector<btScalar> fx;
 	std::vector<btScalar> fy;
 	std::vector<btScalar> fz;
@@ -157,7 +197,7 @@ void Rat::detect_collision(btDiscreteDynamicsWorld* world){
 		btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
 		contactManifold->refreshContactPoints(obA->getWorldTransform(), obB->getWorldTransform());
 		int numContacts = contactManifold->getNumContacts();
-		
+
 		//For each contact point in that manifold
 		for (int j = 0; j < numContacts; j++) {
 			//Get the contact information
@@ -165,8 +205,8 @@ void Rat::detect_collision(btDiscreteDynamicsWorld* world){
 			btVector3 ptA = pt.getPositionWorldOnA();
 			btVector3 ptB = pt.getPositionWorldOnB();
 			double ptdist = pt.getDistance();
-			
-			
+
+
 			if (ptdist < 0.5){
 				int* coll0 = (int*) obA->getUserPointer();
 				if(coll0!=nullptr){
@@ -177,7 +217,7 @@ void Rat::detect_collision(btDiscreteDynamicsWorld* world){
 					*coll1 = 1;
 				}
 			}
-		
+
 		}
 	}
 }

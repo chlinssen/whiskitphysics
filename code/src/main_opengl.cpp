@@ -73,8 +73,8 @@ int gSharedMemoryKey=-1;
 b3MouseMoveCallback prevMouseMoveCallback = 0;
 static void OnMouseMove( float x, float y)
 {
-	bool handled = false; 
-	handled = simulation->mouseMoveCallback(x,y); 	 
+	bool handled = false;
+	handled = simulation->mouseMoveCallback(x,y);
 	if (!handled)
 	{
 		if (prevMouseMoveCallback)
@@ -86,7 +86,7 @@ b3MouseButtonCallback prevMouseButtonCallback  = 0;
 static void OnMouseDown(int button, int state, float x, float y) {
 	bool handled = false;
 
-	handled = simulation->mouseButtonCallback(button, state, x,y); 
+	handled = simulation->mouseButtonCallback(button, state, x,y);
 	if (!handled)
 	{
 		if (prevMouseButtonCallback )
@@ -109,23 +109,23 @@ public:
 	}
 };
 
-int main(int argc, char** argv) 
-{ 
+int main(int argc, char** argv)
+{
 	signal(SIGINT, exit_function);
 	Parameters* param = new Parameters();
-	
-	
 
-  	try 
-  	{ 
-    /** Define and parse the program options 
-     */ 
-	    namespace po = boost::program_options; 
+
+
+  	try
+  	{
+    /** Define and parse the program options
+     */
+	    namespace po = boost::program_options;
 	    po::options_description desc("Options");
-	    desc.add_options() 
+	    desc.add_options()
 		("help,h", "Help screen")
 		("DEBUG", po::value<int>(&param->DEBUG), "debug on/off")
-		
+
 		("TIME_STOP", po::value<float>(&param->TIME_STOP), "duration of simulation")
 
 		("PRINT", po::value<int>(&param->PRINT), "print simulation output")
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
 		("SAVE_VIDEO", po::value<int>(&param->SAVE_VIDEO), "video on/off")
 
 		("OBJECT", po::value<int>(&param->OBJECT), "collision object ID (0: none, 1: stationary peg, 2: moving peg, 3: wall")
-		
+
 		("MODEL_TYPE", po::value<int>(&param->MODEL_TYPE), "model type: 0: average rat, 1: model Belli et al. 2018")
 		("WHISKER_NAMES", po::value<std::vector<std::string> >(&param->WHISKER_NAMES)->multitoken(), "whisker names to simulate")
 		("BLOW,b", po::value<float>(&param->BLOW), "whisker curvature on/off")
@@ -141,14 +141,14 @@ int main(int argc, char** argv)
 		("NO_WHISKERS", po::value<int>(&param->NO_WHISKERS), "whisker on/off")
 
 		("ACTIVE", po::value<int>(&param->ACTIVE), "active on/off")
-		
+
 		("POSITION", po::value<std::vector<std::string> >()->multitoken(), "initial position of rat")
 		("ORIENTATION", po::value<std::vector<std::string> >()->multitoken(), "initial orientation of rat (euler angles)")
 
 		("CDIST", po::value<float>(&param->CDIST), "distance of camera")
 		("CPITCH", po::value<std::string>(), "head pitch")
 		("CYAW", po::value<std::string>(), "head yaw")
-		
+
 		("SPEED", po::value<float>(&param->PEG_SPEED), "peg speed")
 
 		("dir_out", po::value<std::string>(&param->dir_out), "foldername for output file")
@@ -156,19 +156,19 @@ int main(int argc, char** argv)
 		("file_env", po::value<std::string>(&param->file_env), "filename for environment");
 
 
-	    po::variables_map vm; 
+	    po::variables_map vm;
 
 
-	    try { 
-		    po::store(po::parse_command_line(argc, argv, desc,po::command_line_style::unix_style ^ po::command_line_style::allow_short), vm); // can throw 
+	    try {
+		    po::store(po::parse_command_line(argc, argv, desc,po::command_line_style::unix_style ^ po::command_line_style::allow_short), vm); // can throw
 		 	po::notify(vm);
 
-		 	if ( vm.count("help")  ) { 
-		        std::cout << "Bullet Whisker Simulation" << std::endl 
-		                  << desc << std::endl; 
-		        return 0; 
-		    } 
-			
+		 	if ( vm.count("help")  ) {
+		        std::cout << "Bullet Whisker Simulation" << std::endl
+		                  << desc << std::endl;
+		        return 0;
+		    }
+
 			if (param->WHISKER_NAMES[0] == "ALL"){
 	    		param->WHISKER_NAMES = {
 	    			"LA0","LA1","LA2","LA3","LA4",
@@ -205,60 +205,59 @@ int main(int argc, char** argv)
 				param->RATHEAD_LOC[0] = lexical_cast<float>(coordinates[0]);
 				param->RATHEAD_LOC[1] = lexical_cast<float>(coordinates[1]);
 				param->RATHEAD_LOC[2] = lexical_cast<float>(coordinates[2]);
-			}	
+			}
 
 			std::vector<std::string> angles;
 			if (!vm["ORIENTATION"].empty() && (angles = vm["ORIENTATION"].as<std::vector<std::string> >()).size() == 3) {
 				param->RATHEAD_ORIENT[0] = lexical_cast<float>(angles[0]);
 				param->RATHEAD_ORIENT[1] = lexical_cast<float>(angles[1]);
 				param->RATHEAD_ORIENT[2] = lexical_cast<float>(angles[2]);
-			}	
+			}
 
 			if (vm.count("CPITCH")){
 				std::string cpitch;
 				cpitch = vm["CPITCH"].as<std::string>();
 				param->CPITCH = lexical_cast<float>(cpitch);
 			}
-			
+
 			if (vm.count("CYAW")){
 				std::string cyaw;
 				cyaw = vm["CYAW"].as<std::string>();
 				param->CYAW = lexical_cast<float>(cyaw);
 			}
 
-	    	
+
 
 		    // update_parameters(param);
 
 			SimpleOpenGL3App* app = new SimpleOpenGL3App("Bullet Whisker Simulation",1024,768,true);
-			
+
 			prevMouseButtonCallback = app->m_window->getMouseButtonCallback();
 			prevMouseMoveCallback = app->m_window->getMouseMoveCallback();
 
 			app->m_window->setMouseButtonCallback((b3MouseButtonCallback)OnMouseDown);
 			app->m_window->setMouseMoveCallback((b3MouseMoveCallback)OnMouseMove);
-			
+
 			OpenGLGuiHelper gui(app,false);
 			CommonExampleOptions options(&gui);
-			
+
 
 			simulation = new Simulation(options.m_guiHelper);
 			simulation->processCommandLineArgs(argc, argv);
 
 			// save parameters in simulation object
-			simulation->parameters = param;
-			simulation->initPhysics();
+			simulation->initPhysics(parameters);
 			simulation->resetCamera();
 
 			char fileName[1024];
 			int textureWidth = 128;
 			int textureHeight = 128;
-	
+
 			unsigned char*	image = new unsigned char[textureWidth*textureHeight * 4];
 			int textureHandle = app->m_renderer->registerTexture(image, textureWidth, textureHeight);
-			
+
 			// int cubeIndex = app->registerCubeShape(1, 1, 1);
-	
+
 			// b3Vector3 pos = b3MakeVector3(0, 0, 0);
 			// b3Quaternion orn(0, 0, 0, 1);
 			// b3Vector3 color = b3MakeVector3(1, 0, 0);
@@ -267,23 +266,23 @@ int main(int argc, char** argv)
 			if(param->SAVE_VIDEO){
 				std::string videoname = param->file_video;
 				gVideoFileName = &videoname[0];
-				
+
 				if (gVideoFileName){
 					std::cout << "Rendering video..." << std::endl;
 					app->dumpFramesToVideo(gVideoFileName);
-	
+
 				}
 
 				std::string pngname = "png_test";
 				gPngFileName = &pngname[0];
-				
+
 				// app->m_renderer->registerGraphicsInstance(cubeIndex, pos, orn, color, scaling);
 				app->m_renderer->writeTransforms();
 
 
 			}
-			
-			
+
+
 
 			do
 			{
@@ -294,13 +293,13 @@ int main(int argc, char** argv)
 					if (gPngFileName)
 					{
 						// printf("gPngFileName=%s\n", gPngFileName);
-		
+
 						sprintf(fileName, "%s%d.png", gPngFileName, frameCount++);
 						app->dumpNextFrameToPng(fileName);
 					}
-		
-		
-		
+
+
+
 					//update the texels of the texture using a simple pattern, animated using frame index
 					for (int y = 0; y < textureHeight; ++y)
 					{
@@ -314,24 +313,24 @@ int main(int argc, char** argv)
 							pi[0] = pi[1] = pi[2] = pi[3] = c; pi += 3;
 						}
 					}
-		
+
 					app->m_renderer->activateTexture(textureHandle);
 					app->m_renderer->updateTexture(textureHandle, image);
-		
+
 					float color[4] = { 255, 1, 1, 1 };
 					app->m_primRenderer->drawTexturedRect(100, 200, gWidth / 2 - 50, gHeight / 2 - 50, color, 0, 0, 1, 1, true);
 				}
 
 				app->m_instancingRenderer->init();
 		    	app->m_instancingRenderer->updateCamera(app->getUpAxis());
-			
+
 				simulation->stepSimulation();
 
 				if(param->DEBUG!=1){
 					simulation->renderScene();
 					app->m_renderer->renderScene();
 				}
-				
+
 
 				DrawGridData dg;
 		        dg.upAxis = app->getUpAxis();
@@ -344,8 +343,8 @@ int main(int argc, char** argv)
 
 
 			} while (!app->m_window->requestedExit() && !(exitFlag || simulation->exitSim));
-			
-			
+
+
 			if(simulation->parameters->SAVE){
 				std::cout << "Simualtion terminated." << std::endl;
 				std::cout << "Saving data..." << std::endl;
@@ -360,28 +359,28 @@ int main(int argc, char** argv)
 			delete[] image;
 			std::cout << "Done." << std::endl;
 
-	    } 
-	    catch(po::error& e) 
-	    { 
-	      std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
-	      std::cerr << desc << std::endl; 
-	      return 1; 
-	    } 
- 
-    // application code here // 
- 
-  	} 
-  	catch(std::exception& e) 
-  	{ 
-    	std::cerr << "Unhandled Exception reached the top of main: " 
-              << e.what() << ", application will now exit" << std::endl; 
-    	return 2; 
- 
-  	} 
- 
-  	return 0; 
- 
-} // main 
+	    }
+	    catch(po::error& e)
+	    {
+	      std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+	      std::cerr << desc << std::endl;
+	      return 1;
+	    }
+
+    // application code here //
+
+  	}
+  	catch(std::exception& e)
+  	{
+    	std::cerr << "Unhandled Exception reached the top of main: "
+              << e.what() << ", application will now exit" << std::endl;
+    	return 2;
+
+  	}
+
+  	return 0;
+
+} // main
 
 
 

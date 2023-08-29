@@ -20,15 +20,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef WHISKER_H
 #define WHISKER_H
 
+#include "Parameters.h"
 #include "Simulation_IO.h"
 #include "Simulation_utility.h"
-#include "Parameters.h"
 
 #include "btBulletDynamicsCommon.h"
 #include "Serialize/BulletWorldImporter/btWorldImporter.h"
 #include "LinearMath/btVector3.h"
 #include "LinearMath/btAlignedObjectArray.h"
 
+#include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -64,8 +65,6 @@ struct link_data
 class Whisker
 {
 private:
-	std::vector<float> dphi;
-	std::vector<float> dzeta;
 	btVector4 color;
 	btDiscreteDynamicsWorld* m_dynamicsWorld;
 	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes;
@@ -78,7 +77,7 @@ private:
 
 	btTransform basepointTransform;
 	btTransform baseTransform;
-	
+
 	btGeneric6DofConstraint* basePointConstraint;
 	btGeneric6DofConstraint* motorConstraint;
 	btGeneric6DofSpringConstraint* baseConstraint;
@@ -86,15 +85,13 @@ private:
 
 	float m_time;
 	float m_angle;
-	int ACTIVE;
-	int NO_MASS;
-	int BLOW; //for visual clearity
-	int PRINT;
+	bool ACTIVE;
+	bool NO_MASS;
+	bool BLOW; //for visual clearity
+	bool PRINT;
 
-	whisker_config config;
-	Parameters* parameters;
 	std::vector<int> collide;
-	
+
 	// Whisker general configuration parameters
 	float friction;
 	btScalar mass;
@@ -107,7 +104,7 @@ private:
 	btScalar zeta;
 
 	// Whisker specific configuration parameters
-	whisker_config get_config(std::string wname,Parameters* parameters);
+	whisker_config get_config(std::string wname, Parameters& parameters);
 	btScalar length;
 	btScalar link_length;
 	int row;
@@ -128,16 +125,11 @@ private:
 	btScalar calc_volume(btScalar length, btScalar R, btScalar r) const;
 	btScalar calc_damping(btScalar k, btScalar mass, btScalar CoM, btScalar zeta, btScalar dt) const;
 	btScalar calc_stiffness(btScalar E, btScalar I, btScalar length) const;
-	float get_dzeta(int index) const;
-	float get_dphi(int index) const;
 
 public:
-
-	Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* m_guiHelper,btAlignedObjectArray<btCollisionShape*>* shapes, std::string w_name, Parameters* parameters);
+	Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* helper, btAlignedObjectArray< btCollisionShape* >* shapes, std::string w_name, Parameters& parameters, btRigidBody* head, btTransform head2origin);
 	~Whisker(){}
 
-	int idx;	
-	void buildWhisker(btRigidBody* refBody, btTransform offset);
 	void whisk(btScalar a_vel_0, btScalar a_vel_1, btScalar a_vel_2, btVector3 headAngularVelocity);
 
 	btRigidBody* get_unit(int idx) const;
@@ -146,12 +138,13 @@ public:
 	btVector3 getTorques();
 	btVector3 getForces();
 	btVector3 getPosition(int linknr);
-	
+
+	int idx;
+
 	std::vector<float> getX();
 	std::vector<float> getY();
 	std::vector<float> getZ();
 	std::vector<int> getCollision();
-
 };
 
 
