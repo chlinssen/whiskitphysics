@@ -78,7 +78,7 @@ private:
 	output* data_dump = new output();
 	std::vector< float > this_loc_vel;
 
-	std::vector< std::vector< float > > whisker_vel = {{0., 0., 0.}};
+	std::vector< std::vector< float > > whisker_vel;
 
 	float TIME_STEP;
 	int NUM_STEP_INT;
