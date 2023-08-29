@@ -64,7 +64,6 @@ private:
 	int m_step;
 	int m_total_steps;
 
-	btVector3 gravity = btVector3(0,0,-9.8*SCALE); // XXX: move this to parameters
 	btAlignedObjectArray<btVector3> m_objcenter; // store center position calculated from bounding box for all objs, before start trans
     btAlignedObjectArray<btVector3> m_objboundingbox; // store bounding box for all objs, before start trans
 
@@ -94,6 +93,8 @@ private:
 	std::vector< float > PEG_LOC;
 	double PEG_SPEED;
 	string file_env;
+
+	std::vector< float > gravity;
 
 	std::vector< std::vector< float > > HEAD_LOC_VEL;
 	std::string file_whisking_angle;

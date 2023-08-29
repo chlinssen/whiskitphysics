@@ -51,6 +51,8 @@ void Simulation::load_parameters(Parameters& parameters) {
 	WHISKER_PARAMS_DIR = parameters["WHISKER_PARAMS_DIR"].as< std::string >();
 	dir_rathead_trajectory = parameters["dir_rathead_trajectory"].as< std::string >();
 
+	gravity = parameters["gravity"].as< std::vector< float > >();
+
 	OBJECT = parameters["OBJECT"].as< int >();
 	PEG_LOC = parameters["PEG_LOC"].as< std::vector< float > >();
 	PEG_SPEED = parameters["PEG_SPEED"].as< float >();
@@ -178,7 +180,7 @@ void Simulation::initPhysics()
 	}
 
 	// set gravity
-	m_dynamicsWorld->setGravity(btVector3(0,0,0));
+	m_dynamicsWorld->setGravity(SCALE * btVector3(gravity[0], gravity[1], gravity[2]));
 
     // create debug drawer
 	m_guiHelper->createPhysicsDebugDrawer(m_dynamicsWorld);
