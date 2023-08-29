@@ -36,7 +36,6 @@ private:
 	btGeneric6DofConstraint* originConstraint;
 	// Whiskers
 	btAlignedObjectArray<Whisker*> m_whiskerArray;
-	std::vector<std::string> whisker_names;
 
 	btVector3 originOffset = btVector3(0,26,4);		//unit: mm
 	btVector3 originOrientation = btVector3(0,0,0);
@@ -47,8 +46,7 @@ public:
 
 	Rat(GUIHelperInterface* helper, btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*>* shapes, Parameters& parameters);
 	~Rat(){}
-
-	void load_parameters(Parameters& parameters);
+	void initPhysics(btDiscreteDynamicsWorld* world);
 
 	Whisker* getWhisker(int index);
 

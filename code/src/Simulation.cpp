@@ -40,6 +40,8 @@ void Simulation::load_parameters(Parameters& parameters) {
 	ACTIVE = parameters["ACTIVE"].as< bool >();
 	EXPLORING = parameters["EXPLORING"].as< bool >();
 	DEBUG = parameters["DEBUG"].as< bool >();
+	PRINT = parameters["PRINT"].as< int >();
+
 
 	camPos = parameters["CPOS"].as< std::vector< float > >();
 	camDist = parameters["CDIST"].as< float >();
@@ -54,24 +56,34 @@ void Simulation::load_parameters(Parameters& parameters) {
 	PEG_LOC = parameters["PEG_LOC"].as< std::vector< float > >();
 	PEG_SPEED = parameters["PEG_SPEED"].as< float >();
 	file_env = parameters["file_env"].as< std::string >();
+	std::cout <<"aefwefwef4\n";
 
 	// create rat
 	rat = new Rat(m_guiHelper,m_dynamicsWorld, &m_collisionShapes, parameters);
 	btVector3 rathead_pos = rat->getPosition();
 
 	vec = btVector3(0.5,-1,0).normalized();
-	const std::vector < std::string > whisker_names = parameters["whisker_names"].as< std::vector< string > >();
+	const std::vector < std::string > whisker_names = parameters["WHISKER_NAMES"].as< std::vector< std::string > >();
+
+	std::cout << "Whiskers to simulate: ";
+	for (std::string s : whisker_names) {
+		std::cout << "s ";
+	}
+	std::cout << std::endl;
 
 	data_dump->init(whisker_names);
-
 
 	// set camera position to rat head
 	camPos[0] = rathead_pos[0]+camPos[0];
 	camPos[1] = rathead_pos[1]+camPos[1];
 	camPos[2] = rathead_pos[2]+camPos[2];
+	std::cout <<"aefwefwe5\n";
+
 }
 
 void Simulation::stepSimulation(){
+std::cout << "simulation->stepSimulation();...\n";
+
 	auto start = std::chrono::high_resolution_clock::now();
 	m_time += TIME_STEP; 								// increase time
 	m_step += 1;													// increase step
@@ -81,6 +93,7 @@ void Simulation::stepSimulation(){
 
 		// register collisions
 		rat->detect_collision(m_dynamicsWorld);
+std::cout << "simulation->stepSimulation() 1...\n";
 
 		// first, push back data into data_dump
 		if(!NO_WHISKERS && SAVE) {
@@ -88,20 +101,28 @@ void Simulation::stepSimulation(){
 			rat->dump_F(data_dump);
 			rat->dump_Q(data_dump);
 		}
+std::cout << "simulation->stepSimulation()2...\n";
 
 		// moving object 1
 		if(OBJECT==1){
 			if(PEG_SPEED > 0){
+std::cout << "simulation->stepSimulation() 2a...\n";
 				btVector3 velocity = PEG_SPEED * btVector3(0.4,-1,0).normalized();
+std::cout << "simulation->stepSimulation() 2b...\n";
+std::cout << "\tpeg = " << peg << "\n";
 				peg->setLinearVelocity(velocity);
 			}
+std::cout << "simulation->stepSimulation()3...\n";
 		}
+std::cout << "simulation->stepSimulation()3a...\n";
+std::cout << "\trat = " << rat << "\n";
 
 		// move array if in ACTIVE mode
 		if(ACTIVE && !NO_WHISKERS){
 			rat->whisk(m_step, whisker_vel);
 		}
 
+std::cout << "simulation->stepSimulation()4...\n";
 
 		// move rat head if in EXPLORING mode
 		if(EXPLORING){
@@ -111,16 +132,19 @@ void Simulation::stepSimulation(){
 			rat->setAngularVelocity(btVector3(this_loc_vel[6], this_loc_vel[7], this_loc_vel[8]));
 			// rat->setAngularVelocity(btVector3(0, 0, 0));
 		}
+std::cout << "simulation->stepSimulation()5...\n";
 
 		// step simulation
 		m_dynamicsWorld->stepSimulation(TIME_STEP,
 		                                NUM_STEP_INT,
 										TIME_STEP / NUM_STEP_INT);
+std::cout << "simulation->stepSimulation()6...\n";
 
 		// draw debug if enabled
 	    if(DEBUG) {
 	    	m_dynamicsWorld->debugDrawWorld();
 	    }
+std::cout << "simulation->stepSimulation()7...\n";
 
 	    // set exit flag to zero
 	    exitSim = 0;
@@ -143,8 +167,11 @@ void Simulation::stepSimulation(){
 
 void Simulation::initPhysics()
 {
+
+
 	// set visual axis
 	m_guiHelper->setUpAxis(2);
+	std::cout <<"aefwefwe9999 a\n";
 
 	// create empty dynamics world[0]
 	m_collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -168,6 +195,13 @@ void Simulation::initPhysics()
 	m_dynamicsWorld->getSolverInfo().m_splitImpulse = true;
 	m_dynamicsWorld->getSolverInfo().m_erp = 0.8f;
 
+	std::cout <<"aefwefwe9999 b\n";
+
+	if (rat) {
+		rat->initPhysics(m_dynamicsWorld);
+	}
+
+	std::cout <<"aefwefwe12312312312354\n";
 
 	// set gravity
 	m_dynamicsWorld->setGravity(btVector3(0,0,0));
@@ -205,6 +239,7 @@ void Simulation::initPhysics()
 			m_dynamicsWorld->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_NoDebug);
 		}
 	}
+	std::cout <<"aefwefwe9999 c\n";
 
 	// create object to collide with
 	// peg
@@ -233,6 +268,7 @@ void Simulation::initPhysics()
 		btVector4 envColor = btVector4(0.6,0.6,0.6,1);
 		env = new Object(m_guiHelper,m_dynamicsWorld, &m_collisionShapes,btTransform(),file_env,envColor,btScalar(SCALE),btScalar(0),COL_ENV,envCollidesWith);
 	}
+	std::cout <<"aefwefwe9999 d\n";
 
 	// generate graphics
 	m_guiHelper->autogenerateGraphicsObjects(m_dynamicsWorld);
@@ -251,6 +287,7 @@ void Simulation::initPhysics()
 	if (EXPLORING){
 		read_csv_float(dir_rathead_trajectory, HEAD_LOC_VEL);
 	}
+	std::cout <<"aefwefwe9999 e\n";
 
 	// initialize time/step tracker
 	m_time_elapsed = 0;

@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.10.2)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+
+set(CMAKE_BUILD_TYPE Debug)
+
 cmake_policy(SET CMP0017 NEW)
 
 SET(MSVC_INCREMENTAL_DEFAULT ON)
@@ -69,10 +72,6 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 
-# find YAML library
-find_package(yaml-cpp)
-MESSAGE("HMMM")
-
 
 # This is the shortcut to finding GLU, GLUT and OpenGL if they are properly installed on your system
 # This should be the case.
@@ -105,14 +104,18 @@ SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BULLETLIB_DIR})
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BULLETLIB_DIR})
 # SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BULLETLIB_DIR})
 
+# find YAML library
+find_package(yaml-cpp)
+
 INCLUDE_DIRECTORIES(
 	include
 	bulletlib/
-    bulletlib/src
-    bulletlib/examples
-    bulletlib/Extras
-    ${OPENGL_INCLUDE_DIRS}
+	bulletlib/src
+	bulletlib/examples
+	bulletlib/Extras
+	${OPENGL_INCLUDE_DIRS}
 	${GLUT_INCLUDE_DIRS}
+	${YAML_CPP_INCLUDE_DIRS}
 	)
 
 
@@ -152,7 +155,7 @@ TARGET_LINK_LIBRARIES(whiskit
     OpenGLWindow
     BulletExampleBrowserLib
     BulletExampleLib
-
+    ${YAML_CPP_LIBRARIES}
  )
 
 
@@ -215,7 +218,7 @@ TARGET_LINK_LIBRARIES(whiskit_gui
     OpenGLWindow
     BulletExampleBrowserLib
     BulletExampleLib
-
+    ${YAML_CPP_LIBRARIES}
  )
 
 

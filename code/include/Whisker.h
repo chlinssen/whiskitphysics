@@ -88,7 +88,7 @@ private:
 	bool ACTIVE;
 	bool NO_MASS;
 	bool BLOW; //for visual clearity
-	bool PRINT;
+	int PRINT;
 
 	std::vector<int> collide;
 
@@ -127,8 +127,9 @@ private:
 	btScalar calc_stiffness(btScalar E, btScalar I, btScalar length) const;
 
 public:
-	Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* helper, btAlignedObjectArray< btCollisionShape* >* shapes, std::string w_name, Parameters& parameters, btRigidBody* head, btTransform head2origin);
+	Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionShape* >* shapes, std::string w_name, Parameters& parameters, btTransform head2origin);
 	~Whisker(){}
+	void initPhysics(btDiscreteDynamicsWorld* world, btRigidBody* head);
 
 	void whisk(btScalar a_vel_0, btScalar a_vel_1, btScalar a_vel_2, btVector3 headAngularVelocity);
 
@@ -145,6 +146,10 @@ public:
 	std::vector<float> getY();
 	std::vector<float> getZ();
 	std::vector<int> getCollision();
+
+	btTransform head2origin;
+
+	double base_stiffness;
 };
 
 

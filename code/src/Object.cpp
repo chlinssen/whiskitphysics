@@ -30,21 +30,25 @@ Object::Object(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlig
 	guiHelper = helper;
 	collisionGroup = colGroup;
 	collisionMask = colMask;
+	std::cout <<"zzzzzzzzzzzzz a\n";
 
     // add object to world
 	btVector3 obj_trans = trans.getOrigin();
 	btQuaternion obj_orient = trans.getRotation();
 	if(filename.compare("")!=0){
+	std::cout <<"zzzzzzzzzzzzz b\n";
+
 		if(mass==0.){
-			body = obj2StaticBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes,world);
+			body = obj2StaticBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes);
 		}
 		else{
-			body = obj2DynamicBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes,world);
+			body = obj2DynamicBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes);
 		}
 		shape = body->getCollisionShape();
-		
 	}
 	else{
+	std::cout <<"zzzzzzzzzzzzz c\n";
+
 		std::cout << "No shape defined..." << std::endl;
 		noShape = true;
 		btTransform someTransform = createFrame();
@@ -52,15 +56,21 @@ Object::Object(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlig
 		shapes->push_back(sphere);
 		body = createDynamicBody(0,0.5,someTransform,sphere,helper,color);
 		shape = body->getCollisionShape();
-		
 	}
-	
-	world->addRigidBody(body,collisionGroup,collisionMask);
-		
-	calcExtremes();
+	std::cout <<"zzzzzzzzzzzzz d\n";
+std::cout << "body = " << body << "\n";
+std::cout << "collisionGroup = " << collisionGroup << "\n";
+std::cout << "collisionMask = " << collisionMask << "\n";
+	std::cout <<"zzzzzzzzzzzzz e\n";
 
 }
-	
+
+void Object::initPhysics(btDiscreteDynamicsWorld* world) {
+	world->addRigidBody(body,collisionGroup,collisionMask);
+
+	calcExtremes();
+}
+
 void Object::setPosition(btVector3 pos){
 	btTransform objTransform = body->getCenterOfMassTransform();
 	objTransform.setOrigin(pos);
@@ -88,7 +98,7 @@ void Object::calcExtremes(){
 	}
 	else{
 		int num_point = hull->getNumPoints();
-		
+
 		float x = 0;
 		float y = 0;
 		float z = 0;
@@ -105,7 +115,7 @@ void Object::calcExtremes(){
 
 		}
 	}
-	
+
 	btVector3 CoM = body->getCenterOfMassPosition();
 	xyz_max = maxs;
 	xyz_min = mins;
@@ -117,9 +127,9 @@ void Object::calcExtremes(){
 // function to add objects (point clouds) as rigid bodies
 btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 	btVector3 position, btQuaternion orientation, btScalar mass, float scaling_factor, GUIHelperInterface* m_guiHelper,
-	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes,btDiscreteDynamicsWorld* m_dynamicsWorld){
+	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes){
 
-	
+
     GLInstanceGraphicsShape* glmesh = LoadMeshFromObj(fileName.c_str(), "");
     printf("[INFO] Obj loaded: Extracted %d verticed from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
 
@@ -153,25 +163,26 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 
     btTransform trans = createFrame(position);
 	trans.setRotation(orientation);
+std::cout << "1111111111 222\n";
 
 
 	btCollisionShape* shape_compound = LoadShapeFromObj(fileName.c_str(), "", btVector3(scaling[0], scaling[1],scaling[2]));
 	shape_compound->setMargin(0.5);
 	m_collisionShapes->push_back(shape_compound);
 	btRigidBody* body = createDynamicBody(mass,0.5,trans, shape_compound,m_guiHelper,color);
-	
-    int shapeId = m_guiHelper->registerGraphicsShape(&glmesh->m_vertices->at(0).xyzw[0], 
-                                                                    glmesh->m_numvertices, 
-                                                                    &glmesh->m_indices->at(0), 
+
+    int shapeId = m_guiHelper->registerGraphicsShape(&glmesh->m_vertices->at(0).xyzw[0],
+                                                                    glmesh->m_numvertices,
+                                                                    &glmesh->m_indices->at(0),
                                                                     glmesh->m_numIndices,
 																	B3_GL_TRIANGLES, -1);
 
 	btTransform bodyTransform = body->getCenterOfMassTransform();
-	
+
     int renderInstance = m_guiHelper->registerGraphicsInstance(shapeId,bodyTransform.getOrigin(),bodyTransform.getRotation(),color,scaling);
 	body->setUserIndex(renderInstance);
+std::cout << "1111111111\n";
 
-	
     return body;
 }
 
@@ -179,9 +190,9 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 // function to add objects (point clouds) as rigid bodies
 btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 	btVector3 position, btQuaternion orientation, btScalar mass, float scaling_factor, GUIHelperInterface* m_guiHelper,
-	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes,btDiscreteDynamicsWorld* m_dynamicsWorld){
+	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes){
 
-	
+
     GLInstanceGraphicsShape* glmesh = LoadMeshFromObj(fileName.c_str(), "");
     printf("[INFO] Obj loaded: Extracted %d verticed from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
 
@@ -224,20 +235,20 @@ btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 	trimesh->setMargin(0.5);
 	m_collisionShapes->push_back(trimesh);
 	btRigidBody* body = createDynamicBody(0,0.5,trans,trimesh,m_guiHelper,color);
-	
-		
-    int shapeId = m_guiHelper->registerGraphicsShape(&glmesh->m_vertices->at(0).xyzw[0], 
-                                                                    glmesh->m_numvertices, 
-                                                                    &glmesh->m_indices->at(0), 
+
+
+    int shapeId = m_guiHelper->registerGraphicsShape(&glmesh->m_vertices->at(0).xyzw[0],
+                                                                    glmesh->m_numvertices,
+                                                                    &glmesh->m_indices->at(0),
                                                                     glmesh->m_numIndices,
 																	B3_GL_TRIANGLES, -1);
 
 	btTransform bodyTransform = body->getCenterOfMassTransform();
     int renderInstance = m_guiHelper->registerGraphicsInstance(shapeId,bodyTransform.getOrigin(),bodyTransform.getRotation(),color,scaling);
-	
+
 	body->setUserIndex(renderInstance);
 
-	
+
     return body;
 }
 

@@ -20,23 +20,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "Whisker.h"
 
 
-Whisker::Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* helper, btAlignedObjectArray< btCollisionShape* >* shapes, std::string w_name, Parameters& parameters, btRigidBody* head, btTransform head2origin) {
+Whisker::Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionShape* >* shapes, std::string w_name, Parameters& parameters, btTransform head2origin) {
 	color = btVector4(0.1, 0.1, 0.1, 1);
+
+	this->head2origin = head2origin;
 
 	// save parameters and global variables to whisker object
 	m_collisionShapes = shapes;	// shape vector pointer
-	m_dynamicsWorld = world;	// simulation world pointer
 	m_guiHelper = helper;		// gui helper pointer
 
 	m_angle = 0.;		// initialize protraction angle
 	m_time = 0;			// initialize time
+	std::cout <<"whisker 1\n";
 
 	ACTIVE = parameters["ACTIVE"].as< bool >();
 	NO_MASS = parameters["NO_MASS"].as< bool >();
 	BLOW = parameters["BLOW"].as< bool >();
-	PRINT = parameters["PRINT"].as< bool >();
+	PRINT = parameters["PRINT"].as< int >();
 	NUM_LINKS = parameters["NUM_LINKS"].as< unsigned int >();
-	const double base_stiffness = parameters["base_stiffness"].as< double >();
+	base_stiffness = parameters["base_stiffness"].as< double >();
 	NUM_JOINTS = NUM_LINKS - 1;
 
 	// initialize collide array
@@ -67,13 +69,17 @@ Whisker::Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* helper, btA
 	rho_slope = ((parameters["RHO_TIP"].as< double >() - parameters["RHO_BASE"].as< double >())/length / pow(SCALE,3)) ;
 	zeta = parameters["ZETA"].as< double >();				// zeta: damping ratio
 	E = parameters["E"].as< double >() / SCALE;			// E: Young's modulus, SCALE: convert kg/m/s2 to kg/mm/s2
+}
+
+void Whisker::initPhysics(btDiscreteDynamicsWorld* world, btRigidBody* head) {
+	m_dynamicsWorld = world;	// simulation world pointer
 
 	/// CREATE BASE POINT
 	/// This is a box shape that is only translated from origin to basepoint location.
 	/// It's body frame is global axis-aligned.
 
 	// originTransform is the mean location of the whisker array
-	btTransform originTransform = head->getCenterOfMassTransform()*head2origin;
+	btTransform originTransform = head->getCenterOfMassTransform() * head2origin;
 	// basepointTransform is the location of the basepoints
 	btTransform basepointTransform = originTransform*createFrame(base_pos);
 
@@ -109,6 +115,7 @@ Whisker::Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* helper, btA
 	btCollisionShape* baseShape = new btSphereShape(radius_base*5.f);
 	m_collisionShapes->push_back(baseShape);
 	base = createDynamicBody(btScalar(10),friction,baseTransform,baseShape,m_guiHelper,color);
+	std::cout << "Created base, " << base << "\n";
 	// add whisker base rigid body to the world
 	m_dynamicsWorld->addRigidBody(base,COL_BASE,baseCollidesWith);
 	base->setActivationState(DISABLE_DEACTIVATION);
@@ -272,7 +279,10 @@ Whisker::Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* helper, btA
 	}
 }
 
+
 void Whisker::whisk(btScalar a_vel_0, btScalar a_vel_1, btScalar a_vel_2, btVector3 headAngularVelocity){
+
+std::cout << "in Whisker::whisk()\n";
 	// localAngularVelocity is the velocity relative to the rat head
 	btVector3 localAngularVelocity = btVector3(a_vel_0, a_vel_1, a_vel_2);
 	btVector3 globalAngularVelocity = localAngularVelocity + headAngularVelocity;
