@@ -180,7 +180,6 @@ int main(int argc, char** argv)
 			char fileName[1024];
 			int textureWidth = 128;
 			int textureHeight = 128;
-	std::cout <<"aefwefwe6\n";
 
 			unsigned char* image = new unsigned char[textureWidth*textureHeight * 4];
 			int textureHandle = app->m_renderer->registerTexture(image, textureWidth, textureHeight);
@@ -210,9 +209,6 @@ int main(int argc, char** argv)
 
 
 			}
-	std::cout <<"aefwefwe7\n";
-
-
 
 			do
 			{
@@ -256,7 +252,7 @@ int main(int argc, char** argv)
 
 				simulation->stepSimulation();
 
-				if (parameters["DEBUG"].as< bool >()) {
+				if (parameters["DEBUG"].as< int >() != 1) {
 					simulation->renderScene();
 					app->m_renderer->renderScene();
 				}

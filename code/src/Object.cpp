@@ -30,13 +30,11 @@ Object::Object(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlig
 	guiHelper = helper;
 	collisionGroup = colGroup;
 	collisionMask = colMask;
-	std::cout <<"zzzzzzzzzzzzz a\n";
 
     // add object to world
 	btVector3 obj_trans = trans.getOrigin();
 	btQuaternion obj_orient = trans.getRotation();
 	if(filename.compare("")!=0){
-	std::cout <<"zzzzzzzzzzzzz b\n";
 
 		if(mass==0.){
 			body = obj2StaticBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes);
@@ -47,7 +45,6 @@ Object::Object(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlig
 		shape = body->getCollisionShape();
 	}
 	else{
-	std::cout <<"zzzzzzzzzzzzz c\n";
 
 		std::cout << "No shape defined..." << std::endl;
 		noShape = true;
@@ -57,12 +54,6 @@ Object::Object(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlig
 		body = createDynamicBody(0,0.5,someTransform,sphere,helper,color);
 		shape = body->getCollisionShape();
 	}
-	std::cout <<"zzzzzzzzzzzzz d\n";
-std::cout << "body = " << body << "\n";
-std::cout << "collisionGroup = " << collisionGroup << "\n";
-std::cout << "collisionMask = " << collisionMask << "\n";
-	std::cout <<"zzzzzzzzzzzzz e\n";
-
 }
 
 void Object::initPhysics(btDiscreteDynamicsWorld* world) {
@@ -181,7 +172,6 @@ std::cout << "1111111111 222\n";
 
     int renderInstance = m_guiHelper->registerGraphicsInstance(shapeId,bodyTransform.getOrigin(),bodyTransform.getRotation(),color,scaling);
 	body->setUserIndex(renderInstance);
-std::cout << "1111111111\n";
 
     return body;
 }

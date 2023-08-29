@@ -39,7 +39,7 @@ void Simulation::load_parameters(Parameters& parameters) {
 	SAVE = parameters["SAVE"].as< bool >();
 	ACTIVE = parameters["ACTIVE"].as< bool >();
 	EXPLORING = parameters["EXPLORING"].as< bool >();
-	DEBUG = parameters["DEBUG"].as< bool >();
+	DEBUG = parameters["DEBUG"].as< int >();
 	PRINT = parameters["PRINT"].as< int >();
 
 	camPos = parameters["CPOS"].as< std::vector< float > >();
@@ -64,12 +64,6 @@ void Simulation::load_parameters(Parameters& parameters) {
 	vec = btVector3(0.5,-1,0).normalized();
 	const std::vector < std::string > whisker_names = parameters["WHISKER_NAMES"].as< std::vector< std::string > >();
 
-	std::cout << "Whiskers to simulate: ";
-	for (std::string s : whisker_names) {
-		std::cout << "s ";
-	}
-	std::cout << std::endl;
-
 	data_dump->init(whisker_names);
 
 	// set camera position to rat head
@@ -79,7 +73,6 @@ void Simulation::load_parameters(Parameters& parameters) {
 }
 
 void Simulation::stepSimulation(){
-std::cout << "simulation->stepSimulation();...\n";
 
 	auto start = std::chrono::high_resolution_clock::now();
 	m_time += TIME_STEP; 								// increase time
@@ -144,11 +137,6 @@ std::cout << "simulation->stepSimulation();...\n";
 	auto factor = m_time_elapsed / m_time;
 	auto time_remaining = (int)((TIME_STOP - m_time) * (factor));
 	if(PRINT==2){
-
-std::cout << "m_time = " << m_time << "\n";
-std::cout << "TIME_STOP = " << TIME_STOP << "\n";
-
-
 		std::cout << "\rSimulation time: " << std::setprecision(2) << m_time << "s\tCompleted: " << std::setprecision(2) << m_time/TIME_STOP*100 << " %\tTime remaining: " << std::setprecision(4) << time_remaining/60 << " min " << std::setprecision(4) << (time_remaining % 60) << " s\n" << std::flush;
 	}
 
@@ -263,7 +251,6 @@ void Simulation::initPhysics()
 		read_csv_float(dir_param + file_whisking_angle, whisker_vel);
 
 		TIME_STOP = std::min(TIME_STOP, (whisker_vel[0].size()/3 - 1) * TIME_STEP);
-		std::cout << "new TIME_STOP = " << TIME_STOP << ",  (whisker_vel[0].size()/3 - 1) = " <<  (whisker_vel.size()/3 - 1) << "\n";
 	}
 
 	// if exploring, load data for rat head trajectory

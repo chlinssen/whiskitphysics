@@ -31,7 +31,6 @@ Whisker::Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionSh
 
 	m_angle = 0.;		// initialize protraction angle
 	m_time = 0;			// initialize time
-	std::cout <<"whisker 1\n";
 
 	ACTIVE = parameters["ACTIVE"].as< bool >();
 	NO_MASS = parameters["NO_MASS"].as< bool >();
@@ -115,7 +114,6 @@ void Whisker::initPhysics(btDiscreteDynamicsWorld* world, btRigidBody* head) {
 	btCollisionShape* baseShape = new btSphereShape(radius_base*5.f);
 	m_collisionShapes->push_back(baseShape);
 	base = createDynamicBody(btScalar(10),friction,baseTransform,baseShape,m_guiHelper,color);
-	std::cout << "Created base, " << base << "\n";
 	// add whisker base rigid body to the world
 	m_dynamicsWorld->addRigidBody(base,COL_BASE,baseCollidesWith);
 	base->setActivationState(DISABLE_DEACTIVATION);
@@ -282,7 +280,6 @@ void Whisker::initPhysics(btDiscreteDynamicsWorld* world, btRigidBody* head) {
 
 void Whisker::whisk(btScalar a_vel_0, btScalar a_vel_1, btScalar a_vel_2, btVector3 headAngularVelocity){
 
-std::cout << "in Whisker::whisk()\n";
 	// localAngularVelocity is the velocity relative to the rat head
 	btVector3 localAngularVelocity = btVector3(a_vel_0, a_vel_1, a_vel_2);
 	btVector3 globalAngularVelocity = localAngularVelocity + headAngularVelocity;

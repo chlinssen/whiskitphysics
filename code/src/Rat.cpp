@@ -57,23 +57,16 @@ Rat::Rat(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObj
 			"LE1","LE2","LE3","LE4","LE5"};
 	}
 
-	std::cout <<"aefwefwe11111 c\n";
-
 	// set initial position and orientation of rat head
 	btVector3 position = btVector3(RATHEAD_LOC[0], RATHEAD_LOC[1], RATHEAD_LOC[2]);
 	btVector3 orientation = btVector3(RATHEAD_ORIENT[0], RATHEAD_ORIENT[1], RATHEAD_ORIENT[2]);
-	std::cout <<"aefwefwe11111 ccc\n";
 
 	// create transform for ratHead
 	btTransform headTransform = createFrame(position, orientation);
-	std::cout <<"aefwefwe11111 cc\n";
 
 	// define shape and body of head (mass=100)
 	btVector4 color = btVector4(0.1,0.1,0.1,1);
 	rathead = new Object(helper,world,shapes,headTransform,dir_rathead,color,SCALE/10,100.,COL_HEAD,headCollidesWith);
-	std::cout <<"aefwefwe11111 aadadada\n";
-
-	std::cout <<"aefwefwe11111 d\n";
 
 	// create new Whiskers for this rat head
 	// origin: mean position of all basepoints
@@ -82,22 +75,17 @@ Rat::Rat(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObj
 	// create Whiskers
 	if(!parameters["NO_WHISKERS"].as< bool >()) {
 		for(int w=0;w<whisker_names.size();w++){
-			std::cout << "\tcreating whisker " << w << "\n";
 			Whisker* whisker = new Whisker(helper, shapes, whisker_names[w], parameters, head2origin);
 			m_whiskerArray.push_back(whisker);
 		}
 	}
-std::cout << "\twhisker_names = " << whisker_names.size()<< "\n";
-	std::cout <<"finished rat construction\n";
 }
 
 void Rat::initPhysics(btDiscreteDynamicsWorld* world) {
-	std::cout<<" Rat::initPhysics\n";
 	// set rathead->body to active state
 	rathead->initPhysics(world);
 	rathead->body->setActivationState(DISABLE_DEACTIVATION);
 	for(int w = 0; w < m_whiskerArray.size(); ++w) {
-		std::cout << "whisker " << w << " initphys\n";
 		m_whiskerArray[w]->initPhysics(world, rathead->body);
 	}
 }
@@ -136,23 +124,18 @@ const btVector3 Rat::getAngularVelocity(){
 }
 
 void Rat::whisk(int step, std::vector<std::vector<float>> whisker_vel){
-std::cout << "Rat::whisk\n";
 
 	// total number of steps in one cycle of whisking phase
 	int totalStep = whisker_vel[0].size()/3;
 
 	// for every whisker, read its angular velocity at this step
 	for (int i=0;i<m_whiskerArray.size();i++){
-std::cout << "Rat::whisk " << i << "\n";
 		int idx = m_whiskerArray[i]->idx;
-std::cout << "Rat::whisk " << idx << "\n";
-std::cout << "Rat::whisk totalstep = " << totalStep << "\n";
 		btScalar a_vel_0 = whisker_vel[idx][(step%totalStep)*3-3];
 		btScalar a_vel_1 = whisker_vel[idx][(step%totalStep)*3-2];
 		btScalar a_vel_2 = whisker_vel[idx][(step%totalStep)*3-1];
 		m_whiskerArray[i]->whisk(a_vel_0, a_vel_1, a_vel_2, getAngularVelocity());
 	}
-std::cout << "end Rat::whisk\n";
 }
 
 // function to retrieve torques at base points
