@@ -14,7 +14,7 @@ jobs:
       - name: Install apt dependencies
         run: |
           sudo apt update
-          sudo apt install libboost-all-dev freeglut3-dev mesa-utils
+          sudo apt install libboost-all-dev freeglut3-dev mesa-utils libyaml-cpp-dev
       - name: Build Whiskit
         run: |
           mkdir whiskit-build
