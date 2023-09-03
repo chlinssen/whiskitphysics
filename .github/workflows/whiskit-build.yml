@@ -1,6 +1,6 @@
 name: Whiskit
 
-on: [opened, synchronize, reopened]
+on: [push, pull_request]
 
 jobs:
   build:
