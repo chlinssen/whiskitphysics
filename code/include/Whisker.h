@@ -20,15 +20,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef WHISKER_H
 #define WHISKER_H
 
+#include "Parameters.h"
 #include "Simulation_IO.h"
 #include "Simulation_utility.h"
-#include "Parameters.h"
 
 #include "btBulletDynamicsCommon.h"
 #include "Serialize/BulletWorldImporter/btWorldImporter.h"
 #include "LinearMath/btVector3.h"
 #include "LinearMath/btAlignedObjectArray.h"
 
+#include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -65,7 +66,6 @@ class Whisker
 {
 private:
 	btVector4 color;
-	btDiscreteDynamicsWorld* m_dynamicsWorld;
 	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes;
 	GUIHelperInterface* m_guiHelper;
 
@@ -84,13 +84,11 @@ private:
 
 	float m_time;
 	float m_angle;
-	int ACTIVE;
-	int NO_MASS;
-	int BLOW; //for visual clearity
+	bool ACTIVE;
+	bool NO_MASS;
+	bool BLOW; //for visual clearity
 	int PRINT;
 
-	whisker_config config;
-	Parameters* parameters;
 	std::vector<int> collide;
 
 	// Whisker general configuration parameters
@@ -105,7 +103,7 @@ private:
 	btScalar zeta;
 
 	// Whisker specific configuration parameters
-	whisker_config get_config(std::string wname,Parameters* parameters);
+	whisker_config get_config(std::string wname, Parameters& parameters);
 	btScalar length;
 	btScalar link_length;
 	int row;
@@ -128,12 +126,10 @@ private:
 	btScalar calc_stiffness(btScalar E, btScalar I, btScalar length) const;
 
 public:
-
-	Whisker(btDiscreteDynamicsWorld* world, GUIHelperInterface* m_guiHelper,btAlignedObjectArray<btCollisionShape*>* shapes, std::string w_name, Parameters* parameters);
+	Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionShape* >* shapes, std::string w_name, Parameters& parameters, btTransform head2origin);
 	~Whisker(){}
+	void initPhysics(btDiscreteDynamicsWorld* world, btRigidBody* head);
 
-	int idx;
-	void buildWhisker(btRigidBody* refBody, btTransform offset);
 	void whisk(btScalar a_vel_0, btScalar a_vel_1, btScalar a_vel_2, btVector3 headAngularVelocity);
 
 	btRigidBody* get_unit(int idx) const;
@@ -143,11 +139,16 @@ public:
 	btVector3 getForces();
 	btVector3 getPosition(int linknr);
 
+	int idx;
+
 	std::vector<float> getX();
 	std::vector<float> getY();
 	std::vector<float> getZ();
 	std::vector<int> getCollision();
 
+	btTransform head2origin;
+
+	double base_stiffness;
 };
 
 

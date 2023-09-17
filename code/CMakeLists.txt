@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+
 cmake_policy(SET CMP0017 NEW)
 
 SET(MSVC_INCREMENTAL_DEFAULT ON)
@@ -69,6 +70,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 
+
 # This is the shortcut to finding GLU, GLUT and OpenGL if they are properly installed on your system
 # This should be the case.
 
@@ -86,6 +88,7 @@ IF (APPLE)
   FIND_LIBRARY(COCOA_LIBRARY Cocoa)
 ENDIF()
 
+
 FIND_PACKAGE(Boost COMPONENTS program_options filesystem REQUIRED)
 IF (Boost_FOUND)
     INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
@@ -99,14 +102,18 @@ SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BULLETLIB_DIR})
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BULLETLIB_DIR})
 # SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BULLETLIB_DIR})
 
+# find YAML library
+find_package(yaml-cpp)
+
 INCLUDE_DIRECTORIES(
 	include
 	bulletlib/
-    bulletlib/src
-    bulletlib/examples
-    bulletlib/Extras
-    ${OPENGL_INCLUDE_DIRS}
+	bulletlib/src
+	bulletlib/examples
+	bulletlib/Extras
+	${OPENGL_INCLUDE_DIRS}
 	${GLUT_INCLUDE_DIRS}
+	${YAML_CPP_INCLUDE_DIRS}
 	)
 
 
@@ -127,17 +134,17 @@ SET(EXT_SOURCES
 )
 
 ADD_EXECUTABLE(
-	whiskit 
-	${SOURCES} 
-	${EXT_SOURCES} 
+	whiskit
+	${SOURCES}
+	${EXT_SOURCES}
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 
-    
+
 TARGET_LINK_LIBRARIES(whiskit
 	${CMAKE_DL_LIBS}
-	${Boost_LIBRARIES} 	
-	${OPENGL_gl_LIBRARY} 
+	${Boost_LIBRARIES}
+	${OPENGL_gl_LIBRARY}
     ${OPENGL_glu_LIBRARY}
     Bullet3Common
     BulletDynamics
@@ -146,7 +153,7 @@ TARGET_LINK_LIBRARIES(whiskit
     OpenGLWindow
     BulletExampleBrowserLib
     BulletExampleLib
-    
+    ${YAML_CPP_LIBRARIES}
  )
 
 
@@ -197,10 +204,10 @@ ADD_EXECUTABLE(whiskit_gui
     ${CMAKE_SOURCE_DIR}/src/main_opengl.cpp
 )
 
-TARGET_LINK_LIBRARIES(whiskit_gui 
+TARGET_LINK_LIBRARIES(whiskit_gui
 	${CMAKE_DL_LIBS}
-	${Boost_LIBRARIES} 	
-	${OPENGL_gl_LIBRARY} 
+	${Boost_LIBRARIES}
+	${OPENGL_gl_LIBRARY}
     ${OPENGL_glu_LIBRARY}
     Bullet3Common
     BulletDynamics
@@ -209,7 +216,7 @@ TARGET_LINK_LIBRARIES(whiskit_gui
     OpenGLWindow
     BulletExampleBrowserLib
     BulletExampleLib
-    
+    ${YAML_CPP_LIBRARIES}
  )
 
 

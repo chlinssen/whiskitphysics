@@ -30,7 +30,7 @@ Copyright (c) 2015 Google Inc. http://bulletphysics.org
 #include "Simulation_IO.h"
 
 #include <iostream>
-#include <chrono> 
+#include <chrono>
 #include <iomanip>      // std::setprecision
 
 #include "btBulletDynamicsCommon.h"
@@ -45,48 +45,65 @@ class Simulation* SimulationCreateFunc(struct CommonExampleOptions& options);
 
 class Simulation : public CommonRigidBodyBase
 {
+public:
+	Simulation(struct GUIHelperInterface* helper):CommonRigidBodyBase(helper){}
+	virtual ~Simulation(){}
+	virtual void initPhysics();
+	void load_parameters(Parameters& parameters);
 
-private: 
-	
+	virtual void stepSimulation();
+
+	output* get_results();
+	void resetCamera();
+
+	bool exitSim;
+
+private:
 	btScalar m_time_elapsed;
 	btScalar m_time;
 	int m_step;
 	int m_total_steps;
 
-	btVector3 gravity = btVector3(0,0,-9.8*SCALE);
 	btAlignedObjectArray<btVector3> m_objcenter; // store center position calculated from bounding box for all objs, before start trans
     btAlignedObjectArray<btVector3> m_objboundingbox; // store bounding box for all objs, before start trans
 
 	btRigidBody* peg;
 	btRigidBody* wall;
 	btVector3 vec;
-	Rat* scabbers;
+	Rat* rat;
 	Object* object;
 	Object* env;
-	Object* curvWall;
 	output* data_dump = new output();
-	std::vector<float> this_loc_vel;
+	std::vector< float > this_loc_vel;
 
+	std::vector< std::vector< float > > whisker_vel;
 
-public:
-	Simulation(struct GUIHelperInterface* helper):CommonRigidBodyBase(helper){}
-	virtual ~Simulation(){}
-	virtual void initPhysics();
-	virtual void stepSimulation();
-	
-	output* get_results();
-	
-	
-	btScalar camPos[3];
+	float TIME_STEP;
+	int NUM_STEP_INT;
+	float TIME_STOP;
+	bool NO_WHISKERS;
+	bool SAVE;
+	bool ACTIVE;
+	bool EXPLORING;
+	int PRINT;
+	bool DEBUG;
+
+	int OBJECT;
+	std::vector< float > PEG_LOC;
+	double PEG_SPEED;
+	string file_env;
+
+	std::vector< float > gravity;
+
+	std::vector< std::vector< float > > HEAD_LOC_VEL;
+	std::string file_whisking_angle;
+	std::string dir_rathead_trajectory;
+	std::string WHISKER_PARAMS_DIR;
+
+	std::vector< float > camPos;
 	btScalar camDist;
 	btScalar camPitch;
 	btScalar camYaw;
-	void resetCamera();
-
-	// other
-	bool exitSim;
-	Parameters* parameters;
-	
 };
 
 #endif //SIMULATION_H

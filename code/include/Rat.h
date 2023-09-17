@@ -33,20 +33,19 @@ private:
 	// Rigid Bodies
 	Object* rathead;
 	// Constraints
-	btGeneric6DofConstraint* originConstraint; 
+	btGeneric6DofConstraint* originConstraint;
 	// Whiskers
 	btAlignedObjectArray<Whisker*> m_whiskerArray;
-	std::vector<std::string> whisker_names;
-	
+
 	btVector3 originOffset = btVector3(0,26,4);		//unit: mm
 	btVector3 originOrientation = btVector3(0,0,0);
 
 	// btScalar dtheta, angle_fwd, angle_bwd;
 
 public:
-
-	Rat(GUIHelperInterface* helper, btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*>* shapes, Parameters* parameters);
+	Rat(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape*>* shapes, std::vector < std::string > whisker_names, Parameters& parameters);
 	~Rat(){}
+	void initPhysics(btDiscreteDynamicsWorld* world);
 
 	Whisker* getWhisker(int index);
 

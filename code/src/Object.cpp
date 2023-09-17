@@ -23,28 +23,26 @@ Copyright (c) 2015 Google Inc. http://bulletphysics.org
 
 #include "Object.h"
 
-Object::Object(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*>* shapes, btTransform trans,
+Object::Object(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape*>* shapes, btTransform trans,
 	std::string filename, btVector4 color, float scaling, float mass, int colGroup, int colMask){
 
-	dynamicsWorld = world;
 	guiHelper = helper;
 	collisionGroup = colGroup;
 	collisionMask = colMask;
 
-    // add object to world
 	btVector3 obj_trans = trans.getOrigin();
 	btQuaternion obj_orient = trans.getRotation();
 	if(filename.compare("")!=0){
 		if(mass==0.){
-			body = obj2StaticBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes,world);
+			body = obj2StaticBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes);
 		}
 		else{
-			body = obj2DynamicBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes,world);
+			body = obj2DynamicBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes);
 		}
 		shape = body->getCollisionShape();
-		
 	}
 	else{
+
 		std::cout << "No shape defined..." << std::endl;
 		noShape = true;
 		btTransform someTransform = createFrame();
@@ -52,15 +50,15 @@ Object::Object(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlig
 		shapes->push_back(sphere);
 		body = createDynamicBody(0,0.5,someTransform,sphere,helper,color);
 		shape = body->getCollisionShape();
-		
 	}
-	
-	world->addRigidBody(body,collisionGroup,collisionMask);
-		
-	calcExtremes();
-
 }
-	
+
+void Object::initPhysics(btDiscreteDynamicsWorld* world) {
+	world->addRigidBody(body,collisionGroup,collisionMask);
+
+	calcExtremes();
+}
+
 void Object::setPosition(btVector3 pos){
 	btTransform objTransform = body->getCenterOfMassTransform();
 	objTransform.setOrigin(pos);
@@ -79,8 +77,8 @@ void Object::setOrientation(btVector3 axis, btScalar angle){
 }
 
 void Object::calcExtremes(){
-	btVector3 maxs;
-	btVector3 mins;
+	btVector3 maxs(0., 0., 0.);
+	btVector3 mins(0., 0., 0.);
 	btTransform transform = body->getCenterOfMassTransform();
 	if(noShape){
 		maxs = transform*btVector3(0.25,0.25,0.25);
@@ -88,7 +86,7 @@ void Object::calcExtremes(){
 	}
 	else{
 		int num_point = hull->getNumPoints();
-		
+
 		float x = 0;
 		float y = 0;
 		float z = 0;
@@ -102,11 +100,9 @@ void Object::calcExtremes(){
 				if ((i==0) || ((curr_point[j]) < mins[j]))
 					mins[j] = (curr_point[j]);
 			}
-
 		}
 	}
-	
-	btVector3 CoM = body->getCenterOfMassPosition();
+
 	xyz_max = maxs;
 	xyz_min = mins;
 }
@@ -117,11 +113,11 @@ void Object::calcExtremes(){
 // function to add objects (point clouds) as rigid bodies
 btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 	btVector3 position, btQuaternion orientation, btScalar mass, float scaling_factor, GUIHelperInterface* m_guiHelper,
-	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes,btDiscreteDynamicsWorld* m_dynamicsWorld){
+	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes){
 
-	
+
     GLInstanceGraphicsShape* glmesh = LoadMeshFromObj(fileName.c_str(), "");
-    printf("[INFO] Obj loaded: Extracted %d verticed from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
+    printf("[INFO] Dynamic obj loaded: Extracted %d vertices from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
 
     const GLInstanceVertex& v = glmesh->m_vertices->at(0);
     hull = new btConvexHullShape((const btScalar*)(&(v.xyzw[0])), glmesh->m_numvertices, sizeof(GLInstanceVertex));
@@ -131,7 +127,7 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 	float s;
 	if (scaling_factor != 0.){
 		btVector3* all_point_list = hull->getUnscaledPoints();
-		btVector3 min_vec, max_vec;
+		btVector3 min_vec(0., 0., 0.), max_vec(0., 0., 0.);
 		for (int i=0;i<num_point;i++){
 			btVector3 curr_point = all_point_list[i];
 			for (int j=0;j<3;j++){
@@ -154,24 +150,22 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
     btTransform trans = createFrame(position);
 	trans.setRotation(orientation);
 
-
 	btCollisionShape* shape_compound = LoadShapeFromObj(fileName.c_str(), "", btVector3(scaling[0], scaling[1],scaling[2]));
 	shape_compound->setMargin(0.5);
 	m_collisionShapes->push_back(shape_compound);
 	btRigidBody* body = createDynamicBody(mass,0.5,trans, shape_compound,m_guiHelper,color);
-	
-    int shapeId = m_guiHelper->registerGraphicsShape(&glmesh->m_vertices->at(0).xyzw[0], 
-                                                                    glmesh->m_numvertices, 
-                                                                    &glmesh->m_indices->at(0), 
+
+    int shapeId = m_guiHelper->registerGraphicsShape(&glmesh->m_vertices->at(0).xyzw[0],
+                                                                    glmesh->m_numvertices,
+                                                                    &glmesh->m_indices->at(0),
                                                                     glmesh->m_numIndices,
 																	B3_GL_TRIANGLES, -1);
 
 	btTransform bodyTransform = body->getCenterOfMassTransform();
-	
+
     int renderInstance = m_guiHelper->registerGraphicsInstance(shapeId,bodyTransform.getOrigin(),bodyTransform.getRotation(),color,scaling);
 	body->setUserIndex(renderInstance);
 
-	
     return body;
 }
 
@@ -179,11 +173,11 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 // function to add objects (point clouds) as rigid bodies
 btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 	btVector3 position, btQuaternion orientation, btScalar mass, float scaling_factor, GUIHelperInterface* m_guiHelper,
-	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes,btDiscreteDynamicsWorld* m_dynamicsWorld){
+	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes){
 
-	
+
     GLInstanceGraphicsShape* glmesh = LoadMeshFromObj(fileName.c_str(), "");
-    printf("[INFO] Obj loaded: Extracted %d verticed from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
+    printf("[INFO] Static obj loaded: Extracted %d vertices from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
 
     const GLInstanceVertex& v = glmesh->m_vertices->at(0);
     hull = new btConvexHullShape((const btScalar*)(&(v.xyzw[0])), glmesh->m_numvertices, sizeof(GLInstanceVertex));
@@ -216,7 +210,6 @@ btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 
     btTransform trans = createFrame(position);
 	trans.setRotation(orientation);
-
 	btTriangleMesh* meshInterface = new btTriangleMesh();
     for (int i=0;i<num_point/3;i++)
        meshInterface->addTriangle(hull->getScaledPoint(i*3), hull->getScaledPoint(i*3+1), hull->getScaledPoint(i*3+2));
@@ -224,20 +217,18 @@ btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 	trimesh->setMargin(0.5);
 	m_collisionShapes->push_back(trimesh);
 	btRigidBody* body = createDynamicBody(0,0.5,trans,trimesh,m_guiHelper,color);
-	
-		
-    int shapeId = m_guiHelper->registerGraphicsShape(&glmesh->m_vertices->at(0).xyzw[0], 
-                                                                    glmesh->m_numvertices, 
-                                                                    &glmesh->m_indices->at(0), 
+
+
+    int shapeId = m_guiHelper->registerGraphicsShape(&glmesh->m_vertices->at(0).xyzw[0],
+                                                                    glmesh->m_numvertices,
+                                                                    &glmesh->m_indices->at(0),
                                                                     glmesh->m_numIndices,
 																	B3_GL_TRIANGLES, -1);
 
 	btTransform bodyTransform = body->getCenterOfMassTransform();
     int renderInstance = m_guiHelper->registerGraphicsInstance(shapeId,bodyTransform.getOrigin(),bodyTransform.getRotation(),color,scaling);
-	
+
 	body->setUserIndex(renderInstance);
 
-	
     return body;
 }
-

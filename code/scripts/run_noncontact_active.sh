@@ -1,14 +1,1 @@
-../build/whiskit_gui \
---MODEL_TYPE 1 \
---CDIST 50 \
---CPITCH -89 \
---CYAW 90 \
---DEBUG 0 \
---OBJECT 0 \
---TIME_STOP 0.5 \
---ACTIVE 1 \
---WHISKER_NAMES R \
---SAVE_VIDEO 0 \
---SAVE 1 \
---file_video "../output/video_peg.mp4" \
---dir_out ../output/full_array_noncontact_active_graphics
+../whiskit-build/whiskit_gui --parameters="./scripts/parameters/whisker_parameters.yaml,./scripts/parameters/whisker_stimulation_parameters.yaml,./scripts/parameters/environment_parameters.yaml,./scripts/parameters/simulation_parameters.yaml,./scripts/parameters/run_noncontact_active.yaml"
