@@ -1,0 +1,13 @@
+PRINT: 2
+CDIST: 50
+CPITCH: -89
+CYAW: 0
+DEBUG: 0
+OBJECT: 2
+ACTIVE: true
+TIME_STOP: 1.0
+WHISKER_NAMES: ["R"]
+SAVE_VIDEO: false
+SAVE: false
+file_video: "../output/video_wall.mp4"
+dir_out: "../output/full_array_wall_active"

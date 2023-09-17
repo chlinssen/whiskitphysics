@@ -19,43 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Rat.h"
 
-Rat::Rat(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*>* shapes, Parameters& parameters){
+Rat::Rat(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape*>* shapes, std::vector < std::string > whisker_names, Parameters& parameters){
 	const std::vector< float > RATHEAD_LOC = parameters["RATHEAD_LOC"].as< std::vector< float > >();
 	const std::vector< float > RATHEAD_ORIENT = parameters["RATHEAD_ORIENT"].as< std::vector< float > >();
 	const std::string dir_rathead = parameters["dir_rathead"].as< std::string >();
-
-	std::vector<std::string> whisker_names = parameters["WHISKER_NAMES"].as< std::vector< std::string > >();
-
-	if (whisker_names[0] == "ALL") {
-		whisker_names = {
-			"LA0","LA1","LA2","LA3","LA4",
-			"LB0","LB1","LB2","LB3","LB4",
-			"LC0","LC1","LC2","LC3","LC4","LC5",
-			"LD0","LD1","LD2","LD3","LD4","LD5",
-			"LE1","LE2","LE3","LE4","LE5",
-			"RA0","RA1","RA2","RA3","RA4",
-			"RB0","RB1","RB2","RB3","RB4",
-			"RC0","RC1","RC2","RC3","RC4","RC5",
-			"RD0","RD1","RD2","RD3","RD4","RD5",
-			"RE1","RE2","RE3","RE4","RE5"};
-	}
-	else if (whisker_names[0] == "R") {
-		whisker_names = {
-
-			"RA0","RA1","RA2","RA3","RA4",
-			"RB0","RB1","RB2","RB3","RB4",
-			"RC0","RC1","RC2","RC3","RC4","RC5",
-			"RD0","RD1","RD2","RD3","RD4","RD5",
-			"RE1","RE2","RE3","RE4","RE5"};
-	}
-	else if (whisker_names[0] == "L") {
-		whisker_names = {
-			"LA0","LA1","LA2","LA3","LA4",
-			"LB0","LB1","LB2","LB3","LB4",
-			"LC0","LC1","LC2","LC3","LC4","LC5",
-			"LD0","LD1","LD2","LD3","LD4","LD5",
-			"LE1","LE2","LE3","LE4","LE5"};
-	}
 
 	// set initial position and orientation of rat head
 	btVector3 position = btVector3(RATHEAD_LOC[0], RATHEAD_LOC[1], RATHEAD_LOC[2]);
@@ -74,7 +41,7 @@ Rat::Rat(GUIHelperInterface* helper,btDiscreteDynamicsWorld* world, btAlignedObj
 
 	// create Whiskers
 	if(!parameters["NO_WHISKERS"].as< bool >()) {
-		for(int w=0;w<whisker_names.size();w++){
+		for(int w = 0; w < whisker_names.size(); ++w){
 			Whisker* whisker = new Whisker(helper, shapes, whisker_names[w], parameters, head2origin);
 			m_whiskerArray.push_back(whisker);
 		}

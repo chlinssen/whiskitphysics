@@ -73,7 +73,6 @@ private:
 	Rat* rat;
 	Object* object;
 	Object* env;
-	Object* curvWall;
 	output* data_dump = new output();
 	std::vector< float > this_loc_vel;
 

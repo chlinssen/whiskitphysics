@@ -33,7 +33,6 @@ Object::Object(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape
 	btVector3 obj_trans = trans.getOrigin();
 	btQuaternion obj_orient = trans.getRotation();
 	if(filename.compare("")!=0){
-
 		if(mass==0.){
 			body = obj2StaticBody(filename,color,obj_trans,obj_orient,mass,scaling,helper,shapes);
 		}
@@ -78,8 +77,8 @@ void Object::setOrientation(btVector3 axis, btScalar angle){
 }
 
 void Object::calcExtremes(){
-	btVector3 maxs;
-	btVector3 mins;
+	btVector3 maxs(0., 0., 0.);
+	btVector3 mins(0., 0., 0.);
 	btTransform transform = body->getCenterOfMassTransform();
 	if(noShape){
 		maxs = transform*btVector3(0.25,0.25,0.25);
@@ -120,7 +119,7 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 
 
     GLInstanceGraphicsShape* glmesh = LoadMeshFromObj(fileName.c_str(), "");
-    printf("[INFO] Obj loaded: Extracted %d verticed from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
+    printf("[INFO] Dynamic obj loaded: Extracted %d vertices from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
 
     const GLInstanceVertex& v = glmesh->m_vertices->at(0);
     hull = new btConvexHullShape((const btScalar*)(&(v.xyzw[0])), glmesh->m_numvertices, sizeof(GLInstanceVertex));
@@ -180,7 +179,7 @@ btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 
 
     GLInstanceGraphicsShape* glmesh = LoadMeshFromObj(fileName.c_str(), "");
-    printf("[INFO] Obj loaded: Extracted %d verticed from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
+    printf("[INFO] Static obj loaded: Extracted %d vertices from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
 
     const GLInstanceVertex& v = glmesh->m_vertices->at(0);
     hull = new btConvexHullShape((const btScalar*)(&(v.xyzw[0])), glmesh->m_numvertices, sizeof(GLInstanceVertex));
