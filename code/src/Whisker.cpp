@@ -70,9 +70,7 @@ Whisker::Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionSh
 	E = parameters["E"].as< double >() / SCALE;			// E: Young's modulus, SCALE: convert kg/m/s2 to kg/mm/s2
 }
 
-void Whisker::initPhysics(btDiscreteDynamicsWorld* world, btRigidBody* head) {
-	m_dynamicsWorld = world;	// simulation world pointer
-
+void Whisker::initPhysics(btDiscreteDynamicsWorld* m_dynamicsWorld, btRigidBody* head) {
 	/// CREATE BASE POINT
 	/// This is a box shape that is only translated from origin to basepoint location.
 	/// It's body frame is global axis-aligned.

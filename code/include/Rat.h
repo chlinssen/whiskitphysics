@@ -43,8 +43,7 @@ private:
 	// btScalar dtheta, angle_fwd, angle_bwd;
 
 public:
-
-	Rat(GUIHelperInterface* helper, btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*>* shapes, Parameters& parameters);
+	Rat(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape*>* shapes, std::vector < std::string > whisker_names, Parameters& parameters);
 	~Rat(){}
 	void initPhysics(btDiscreteDynamicsWorld* world);
 

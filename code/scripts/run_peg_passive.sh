@@ -1,14 +1,1 @@
-
-../build/whiskit_gui \
---CDIST 50 \
---CPITCH -89 \
---CYAW 90 \
---DEBUG 0 \
---OBJECT 1 \
---SPEED 300 \
---ACTIVE 0 \
---WHISKER_NAMES R \
---SAVE_VIDEO 0 \
---SAVE 0 \
---file_video "../output/video_peg.mp4" \
---dir_out ../output/full_array_peg_passive
+../whiskit-build/whiskit_gui --parameters="./scripts/parameters/whisker_parameters.yaml,./scripts/parameters/whisker_stimulation_parameters.yaml,./scripts/parameters/environment_parameters.yaml,./scripts/parameters/simulation_parameters.yaml,./scripts/parameters/run_peg_passive.yaml"

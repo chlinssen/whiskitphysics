@@ -58,18 +58,48 @@ void Simulation::load_parameters(Parameters& parameters) {
 	PEG_SPEED = parameters["PEG_SPEED"].as< float >();
 	file_env = parameters["file_env"].as< std::string >();
 
-	// create rat
-	rat = new Rat(m_guiHelper,m_dynamicsWorld, &m_collisionShapes, parameters);
-	btVector3 rathead_pos = rat->getPosition();
+	// get whiskers to simulate
+	std::vector < std::string > whisker_names = parameters["WHISKER_NAMES"].as< std::vector< std::string > >();
 
-	vec = btVector3(0.5,-1,0).normalized();
-	const std::vector < std::string > whisker_names = parameters["WHISKER_NAMES"].as< std::vector< std::string > >();
+	if (whisker_names[0] == "ALL") {
+		whisker_names = {
+			"LA0","LA1","LA2","LA3","LA4",
+			"LB0","LB1","LB2","LB3","LB4",
+			"LC0","LC1","LC2","LC3","LC4","LC5",
+			"LD0","LD1","LD2","LD3","LD4","LD5",
+			"LE1","LE2","LE3","LE4","LE5",
+			"RA0","RA1","RA2","RA3","RA4",
+			"RB0","RB1","RB2","RB3","RB4",
+			"RC0","RC1","RC2","RC3","RC4","RC5",
+			"RD0","RD1","RD2","RD3","RD4","RD5",
+			"RE1","RE2","RE3","RE4","RE5"};
+	}
+	else if (whisker_names[0] == "R") {
+		whisker_names = {
+			"RA0","RA1","RA2","RA3","RA4",
+			"RB0","RB1","RB2","RB3","RB4",
+			"RC0","RC1","RC2","RC3","RC4","RC5",
+			"RD0","RD1","RD2","RD3","RD4","RD5",
+			"RE1","RE2","RE3","RE4","RE5"};
+	}
+	else if (whisker_names[0] == "L") {
+		whisker_names = {
+			"LA0","LA1","LA2","LA3","LA4",
+			"LB0","LB1","LB2","LB3","LB4",
+			"LC0","LC1","LC2","LC3","LC4","LC5",
+			"LD0","LD1","LD2","LD3","LD4","LD5",
+			"LE1","LE2","LE3","LE4","LE5"};
+	}
 
 	std::cout << "Whiskers to simulate: ";
 	for (std::string s : whisker_names) {
 		std::cout << s << " ";
 	}
 	std::cout << std::endl;
+
+	// create rat
+	rat = new Rat(m_guiHelper, &m_collisionShapes, whisker_names, parameters);
+	btVector3 rathead_pos = rat->getPosition();
 
 	data_dump->init(whisker_names);
 
@@ -226,7 +256,6 @@ void Simulation::initPhysics()
 		peg = createDynamicBody(1,0.5,trans, pegShape, m_guiHelper,  BLUE);
 		m_dynamicsWorld->addRigidBody(peg,COL_ENV,envCollidesWith);
 		peg->setActivationState(DISABLE_DEACTIVATION);
-
 	}
 	// create object to collide with wall
 	else if(OBJECT==2){
@@ -241,7 +270,8 @@ void Simulation::initPhysics()
 	else if(OBJECT==3){
 		// add environment to world
 		btVector4 envColor = btVector4(0.6,0.6,0.6,1);
-		env = new Object(m_guiHelper, &m_collisionShapes,btTransform(),file_env,envColor,btScalar(SCALE),btScalar(0),COL_ENV,envCollidesWith);
+		env = new Object(m_guiHelper,&m_collisionShapes,btTransform(),file_env,envColor,btScalar(SCALE),btScalar(0),COL_ENV,envCollidesWith);
+		env->initPhysics(m_dynamicsWorld);
 	}
 
 	// generate graphics

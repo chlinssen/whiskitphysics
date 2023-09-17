@@ -92,6 +92,7 @@ static void OnMouseMove( float x, float y)
 {
 	bool handled = false;
 	handled = simulation->mouseMoveCallback(x,y);
+
 	if (!handled)
 	{
 		if (prevMouseMoveCallback)
@@ -172,8 +173,7 @@ int main(int argc, char** argv)
 			OpenGLGuiHelper gui(app,false);
 			CommonExampleOptions options(&gui);
 
-
-			Simulation* simulation = new Simulation(options.m_guiHelper);
+			simulation = new Simulation(options.m_guiHelper);
 			simulation->load_parameters(parameters);
 			simulation->initPhysics();
 			simulation->resetCamera();

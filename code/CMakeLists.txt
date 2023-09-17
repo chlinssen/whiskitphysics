@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
 
-# set(CMAKE_BUILD_TYPE Debug)
-
 cmake_policy(SET CMP0017 NEW)
 
 SET(MSVC_INCREMENTAL_DEFAULT ON)

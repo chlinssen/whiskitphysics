@@ -66,7 +66,6 @@ class Whisker
 {
 private:
 	btVector4 color;
-	btDiscreteDynamicsWorld* m_dynamicsWorld;
 	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes;
 	GUIHelperInterface* m_guiHelper;
 
