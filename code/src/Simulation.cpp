@@ -110,8 +110,10 @@ void Simulation::load_parameters(Parameters& parameters) {
 
 	if(OBJECT==3){
 		// create object from 3D scan
-		btVector4 envColor = btVector4(1,0.6,0.6,1);
-		env = new Object(m_guiHelper,&m_collisionShapes,btTransform(),file_env,envColor,btScalar(SCALE),btScalar(0),COL_ENV,envCollidesWith);
+		btTransform xfrm;
+		xfrm.setIdentity();
+		btVector4 envColor = btVector4(0.6,0.6,0.6,1);
+		env = new Object(m_guiHelper,&m_collisionShapes,xfrm,file_env,envColor,btScalar(SCALE),btScalar(0),COL_ENV,envCollidesWith);
 	}
 }
 

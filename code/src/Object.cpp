@@ -100,11 +100,9 @@ void Object::calcExtremes(){
 				if ((i==0) || ((curr_point[j]) < mins[j]))
 					mins[j] = (curr_point[j]);
 			}
-
 		}
 	}
 
-	btVector3 CoM = body->getCenterOfMassPosition();
 	xyz_max = maxs;
 	xyz_min = mins;
 }
@@ -129,7 +127,7 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 	float s;
 	if (scaling_factor != 0.){
 		btVector3* all_point_list = hull->getUnscaledPoints();
-		btVector3 min_vec, max_vec;
+		btVector3 min_vec(0., 0., 0.), max_vec(0., 0., 0.);
 		for (int i=0;i<num_point;i++){
 			btVector3 curr_point = all_point_list[i];
 			for (int j=0;j<3;j++){
@@ -212,7 +210,6 @@ btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 
     btTransform trans = createFrame(position);
 	trans.setRotation(orientation);
-
 	btTriangleMesh* meshInterface = new btTriangleMesh();
     for (int i=0;i<num_point/3;i++)
        meshInterface->addTriangle(hull->getScaledPoint(i*3), hull->getScaledPoint(i*3+1), hull->getScaledPoint(i*3+2));
@@ -233,7 +230,5 @@ btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 
 	body->setUserIndex(renderInstance);
 
-
     return body;
 }
-
