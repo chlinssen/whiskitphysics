@@ -31,9 +31,7 @@ Copyright (c) 2015 Google Inc. http://bulletphysics.org
 #include <vector>
 #include <string>
 
-class Object
-
-{
+class Object {
 private:
 
 	btVector3 principle_axis = btVector3(0,1,0).normalize();

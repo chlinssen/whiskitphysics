@@ -290,11 +290,14 @@ void Simulation::initPhysics()
 
 		read_csv_float(dir_param + file_whisking_angle, whisker_vel);
 
+		std::cout << "Read " << whisker_vel[0].size() / 3 << " datapoints\n";
+
 		TIME_STOP = std::min(TIME_STOP, (whisker_vel[0].size()/3 - 1) * TIME_STEP);
 	}
 
 	// if exploring, load data for rat head trajectory
 	if (EXPLORING){
+		std::cout << "Reading rat head trajectory from " << dir_rathead_trajectory << "\n";
 		read_csv_float(dir_rathead_trajectory, HEAD_LOC_VEL);
 	}
 
