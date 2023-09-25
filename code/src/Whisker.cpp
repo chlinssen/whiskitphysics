@@ -34,7 +34,7 @@ Whisker::Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionSh
 
 	ACTIVE = parameters["ACTIVE"].as< bool >();
 	NO_MASS = parameters["NO_MASS"].as< bool >();
-	BLOW = parameters["BLOW"].as< bool >();
+	BLOW = parameters["BLOW"].as< double >();
 	PRINT = parameters["PRINT"].as< int >();
 	NUM_LINKS = parameters["NUM_LINKS"].as< unsigned int >();
 	base_stiffness = parameters["base_stiffness"].as< double >();

@@ -86,7 +86,7 @@ private:
 	float m_angle;
 	bool ACTIVE;
 	bool NO_MASS;
-	bool BLOW; //for visual clearity
+	double BLOW; //for visual clearity
 	int PRINT;
 
 	std::vector<int> collide;
