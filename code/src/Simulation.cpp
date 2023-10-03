@@ -34,6 +34,7 @@ btVector4 ORANGE = btVector4(1.,0.647,0.0,1);
 void Simulation::load_parameters(Parameters& parameters) {
 	TIME_STEP = parameters["TIME_STEP"].as< float >();
 	NUM_STEP_INT = parameters["NUM_STEP_INT"].as< int >();
+	NUM_STEP_SOLVER = parameters["NUM_STEP_SOLVER"].as< int >();
 	TIME_STOP = parameters["TIME_STOP"].as< float >();
 	NO_WHISKERS = parameters["NO_WHISKERS"].as< bool >();
 	SAVE = parameters["SAVE"].as< bool >();
@@ -205,7 +206,7 @@ void Simulation::initPhysics()
 	m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration);
 
 	// set number of iterations
-	m_dynamicsWorld->getSolverInfo().m_numIterations = 20;
+	m_dynamicsWorld->getSolverInfo().m_numIterations = NUM_STEP_SOLVER;
 	m_dynamicsWorld->getSolverInfo().m_solverMode = SOLVER_SIMD |
                         SOLVER_USE_WARMSTARTING |
                         SOLVER_RANDMIZE_ORDER |
