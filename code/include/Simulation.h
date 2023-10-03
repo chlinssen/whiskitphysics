@@ -80,6 +80,7 @@ private:
 
 	float TIME_STEP;
 	int NUM_STEP_INT;
+	int NUM_STEP_SOLVER;
 	float TIME_STOP;
 	bool NO_WHISKERS;
 	bool SAVE;
