@@ -74,14 +74,14 @@ private:
 	Object* object;
 	Object* env;
 	output* data_dump = new output();
-	std::vector< float > this_loc_vel;
+	std::vector< btScalar > this_loc_vel;
 
-	std::vector< std::vector< float > > whisker_vel;
+	std::vector< std::vector< btScalar > > whisker_vel;
 
-	float TIME_STEP;
+	btScalar TIME_STEP;
 	int NUM_STEP_INT;
 	int NUM_STEP_SOLVER;
-	float TIME_STOP;
+	btScalar TIME_STOP;
 	bool NO_WHISKERS;
 	bool SAVE;
 	bool ACTIVE;
@@ -90,18 +90,18 @@ private:
 	bool DEBUG;
 
 	int OBJECT;
-	std::vector< float > PEG_LOC;
-	double PEG_SPEED;
+	std::vector< btScalar > PEG_LOC;
+	btScalar PEG_SPEED;
 	string file_env;
 
-	std::vector< float > gravity;
+	std::vector< btScalar > gravity;
 
-	std::vector< std::vector< float > > HEAD_LOC_VEL;
+	std::vector< std::vector< btScalar > > HEAD_LOC_VEL;
 	std::string file_whisking_angle;
 	std::string dir_rathead_trajectory;
 	std::string WHISKER_PARAMS_DIR;
 
-	std::vector< float > camPos;
+	std::vector< btScalar > camPos;
 	btScalar camDist;
 	btScalar camPitch;
 	btScalar camYaw;

@@ -41,12 +41,10 @@ void clear_output(output* data){
 }
 
 void save_data(output* data, std::string dirname){
-    
-    if(boost::filesystem::exists("../output")){
-        std::cout << "Saving data..." << std::endl;
-    }
-    else{
-        std::cout << "Saving data..." << std::endl;
+
+    std::cout << "Saving data to " << dirname << "..." << std::endl;
+    if(!boost::filesystem::exists("../output")){
+        std::cout << "Creating output directory..." << std::endl;
         try{
             boost::filesystem::create_directory("../output");
         }
@@ -54,19 +52,18 @@ void save_data(output* data, std::string dirname){
             printf("- Error creating output directory!\n");
             exit(1);
         }
-
     }
 
     if(boost::filesystem::exists(dirname)){
-        std::cout << "- Output folder exists." << std::endl;
+        std::cout << "Output folder exists." << std::endl;
     }
     else{
-        std::cout << "- Creating new output folder." << std::endl;
+        std::cout << "Creating new output folder." << std::endl;
         try{
             boost::filesystem::create_directory(dirname);
         }
         catch(int e){
-            printf("- Error creating output target directory!\n");
+            printf("Error creating output target directory!\n");
             exit(1);
         }
 
@@ -93,7 +90,7 @@ void save_data(output* data, std::string dirname){
             printf("- Error creating output subdirectory!\n");
             exit(1);
         }
-        
+
     }
 
     std::string subdirname2 = dirname + "/kinematics/x";
@@ -139,16 +136,16 @@ void save_data(output* data, std::string dirname){
             exit(1);
         }
     }
-    
+
     std::string filename;
-    
+
     // save data to csv files
     try{
         filename = dirname + "/whisker_ID.csv";
         write_1D_string_csv(filename,data->names);
         std::cout << "- Whisker IDs saved." << std::endl;
     }
-    catch (...) { 
+    catch (...) {
         std::cout << "- Saving Whisker IDs failed." << std::endl;
     }
 
@@ -162,14 +159,14 @@ void save_data(output* data, std::string dirname){
             write_2D_float_csv(filename,data->Q[i].Z);
             filename = subdirname5 + "/" + data->Q[i].name + ".csv";
             write_2D_int_csv(filename,data->Q[i].C);
-            
+
         }
         std::cout << "- Kinematics saved." << std::endl;
     }
-    catch (...) { 
+    catch (...) {
         std::cout << "- Saving kinematics failed." << std::endl;
     }
-    
+
 
     // save data to csv files
     try{
@@ -177,7 +174,7 @@ void save_data(output* data, std::string dirname){
         write_2D_float_csv(filename,data->Mx);
         std::cout << "- Mx saved." << std::endl;
     }
-    catch (...) { 
+    catch (...) {
         std::cout << "- Saving Mx failed." << std::endl;
     }
     try{
@@ -185,7 +182,7 @@ void save_data(output* data, std::string dirname){
         write_2D_float_csv(filename,data->My);
         std::cout << "- My saved." << std::endl;
     }
-    catch (...) { 
+    catch (...) {
         std::cout << "- Saving My failed." << std::endl;
     }
     try{
@@ -193,7 +190,7 @@ void save_data(output* data, std::string dirname){
         write_2D_float_csv(filename,data->Mz);
         std::cout << "- Mz saved." << std::endl;
     }
-    catch (...) { 
+    catch (...) {
         std::cout << "- Saving Mz failed." << std::endl;
     }
     try{
@@ -201,7 +198,7 @@ void save_data(output* data, std::string dirname){
         write_2D_float_csv(filename,data->Fx);
         std::cout << "- Fx saved." << std::endl;
     }
-    catch (...) { 
+    catch (...) {
         std::cout << "- Saving Fx failed." << std::endl;
     }
     try{
@@ -209,7 +206,7 @@ void save_data(output* data, std::string dirname){
         write_2D_float_csv(filename,data->Fy);
         std::cout << "- Fy saved." << std::endl;
     }
-    catch (...) { 
+    catch (...) {
         std::cout << "- Saving Fy failed." << std::endl;
     }
     try{
@@ -217,13 +214,13 @@ void save_data(output* data, std::string dirname){
         write_2D_float_csv(filename,data->Fz);
         std::cout << "- Fz saved." << std::endl;
     }
-    catch (...) { 
+    catch (...) {
         std::cout << "- Saving Fz failed." << std::endl;
     }
-    
+
 }
 
-void write_2D_float_csv(std::string filename, std::vector<std::vector<float>> data){
+void write_2D_float_csv(std::string filename, std::vector<std::vector<btScalar>> data){
     std::ofstream outputFile;
     outputFile.open(filename);
     for(int row=0;row<data.size();row++){
@@ -259,7 +256,6 @@ void write_1D_string_csv(std::string filename, std::vector<std::string> data){
 
 
 void read_csv_string(std::string fileName, std::vector<std::string> &dataList){
-    
     std::ifstream file(fileName);
     std::string line = "";
     std::string delimeter = ",";
@@ -268,7 +264,7 @@ void read_csv_string(std::string fileName, std::vector<std::string> &dataList){
         // Iterate through each line and split the content using delimeter
         while (getline(file, line))
         {
-            
+
             dataList.push_back(line);
         }
         // Close the File
@@ -282,7 +278,7 @@ void read_csv_string(std::string fileName, std::vector<std::string> &dataList){
 }
 
 void read_csv_int(std::string fileName, std::vector<std::vector<int> > &dataList){
-    
+
     std::ifstream file(fileName);
     std::string line = "";
     std::string delimeter = ",";
@@ -295,11 +291,11 @@ void read_csv_int(std::string fileName, std::vector<std::vector<int> > &dataList
             std::vector<int> vec_num;
             boost::algorithm::split(vec_string, line, boost::is_any_of(delimeter));
 
-            // convert to float
+            // convert to double
             for(int i=0;i<vec_string.size();i++){
                 vec_num.push_back(boost::lexical_cast<int>(vec_string[i]));
             }
-            
+
             dataList.push_back(vec_num);
         }
         // Close the File
@@ -313,10 +309,7 @@ void read_csv_int(std::string fileName, std::vector<std::vector<int> > &dataList
 
 }
 
-void read_csv_float(std::string fileName, std::vector<std::vector<float> > &dataList){
-    
-    
-
+void read_csv_float(std::string fileName, std::vector<std::vector<btScalar> > &dataList){
     std::ifstream file(fileName);
     std::string line = "";
     std::string delimeter = ",";
@@ -326,14 +319,15 @@ void read_csv_float(std::string fileName, std::vector<std::vector<float> > &data
         while (getline(file, line))
         {
             std::vector<std::string> vec_string;
-            std::vector<float> vec_num;
+            std::vector<btScalar> vec_num;
             boost::algorithm::split(vec_string, line, boost::is_any_of(delimeter));
 
-            // convert to float
+            // convert to double
             for(int i=0;i<vec_string.size();i++){
-                vec_num.push_back(boost::lexical_cast<float>(vec_string[i]));
+                // std::cout << "casting " << vec_string[i] << "\n";
+                vec_num.push_back(boost::lexical_cast<btScalar>(vec_string[i]));
             }
-            
+
             dataList.push_back(vec_num);
         }
         // Close the File

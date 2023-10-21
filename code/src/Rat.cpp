@@ -20,8 +20,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "Rat.h"
 
 Rat::Rat(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape*>* shapes, std::vector < std::string > whisker_names, Parameters& parameters){
-	const std::vector< float > RATHEAD_LOC = parameters["RATHEAD_LOC"].as< std::vector< float > >();
-	const std::vector< float > RATHEAD_ORIENT = parameters["RATHEAD_ORIENT"].as< std::vector< float > >();
+	const std::vector< btScalar > RATHEAD_LOC = parameters["RATHEAD_LOC"].as< std::vector< btScalar > >();
+	const std::vector< btScalar > RATHEAD_ORIENT = parameters["RATHEAD_ORIENT"].as< std::vector< btScalar > >();
 	const std::string dir_rathead = parameters["dir_rathead"].as< std::string >();
 
 	// set initial position and orientation of rat head
@@ -90,7 +90,7 @@ const btVector3 Rat::getAngularVelocity(){
 	return rathead->body->getAngularVelocity();
 }
 
-void Rat::whisk(int step, std::vector<std::vector<float>> whisker_vel){
+void Rat::whisk(int step, std::vector<std::vector<btScalar>> whisker_vel){
 
 	// total number of steps in one cycle of whisking phase
 	int totalStep = whisker_vel[0].size()/3;
@@ -174,7 +174,7 @@ void Rat::detect_collision(btDiscreteDynamicsWorld* world){
 			btManifoldPoint& pt = contactManifold->getContactPoint(j);
 			btVector3 ptA = pt.getPositionWorldOnA();
 			btVector3 ptB = pt.getPositionWorldOnB();
-			double ptdist = pt.getDistance();
+			btScalar ptdist = pt.getDistance();
 
 
 			if (ptdist < 0.5){

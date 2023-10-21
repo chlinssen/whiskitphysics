@@ -31,9 +31,7 @@ Copyright (c) 2015 Google Inc. http://bulletphysics.org
 #include <vector>
 #include <string>
 
-class Object
-
-{
+class Object {
 private:
 
 	btVector3 principle_axis = btVector3(0,1,0).normalize();
@@ -47,7 +45,7 @@ private:
 public:
 
 	Object(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape*>* shapes, btTransform trans,
-	std::string filename, btVector4 color, float scaling, float mass, int colGroup, int colMask);
+	std::string filename, btVector4 color, btScalar scaling, btScalar mass, int colGroup, int colMask);
 	~Object(){}
 
 	btRigidBody* body;
@@ -64,9 +62,9 @@ public:
 	void setPosition(btVector3 pos);
 	void setOrientation(btVector3 axis, btScalar angle);
 
-	btRigidBody* obj2DynamicBody(std::string fileName,btVector4 color, btVector3 position, btQuaternion orientation, btScalar mass, float scaling_factor,
+	btRigidBody* obj2DynamicBody(std::string fileName,btVector4 color, btVector3 position, btQuaternion orientation, btScalar mass, btScalar scaling_factor,
     	GUIHelperInterface* m_guiHelper,btAlignedObjectArray<btCollisionShape*>* m_collisionShapes);
-	btRigidBody* obj2StaticBody(std::string fileName,btVector4 color, btVector3 position, btQuaternion orientation, btScalar mass, float scaling_factor,
+	btRigidBody* obj2StaticBody(std::string fileName,btVector4 color, btVector3 position, btQuaternion orientation, btScalar mass, btScalar scaling_factor,
 		GUIHelperInterface* m_guiHelper,btAlignedObjectArray<btCollisionShape*>* m_collisionShapes);
 	void initPhysics(btDiscreteDynamicsWorld* world);
 };

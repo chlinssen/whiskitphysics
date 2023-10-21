@@ -35,25 +35,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 struct kinematic_data{
 	std::string name;
-	std::vector<std::vector<float>> X;
-	std::vector<std::vector<float>> Y;
-	std::vector<std::vector<float>> Z;
+	std::vector<std::vector<btScalar>> X;
+	std::vector<std::vector<btScalar>> Y;
+	std::vector<std::vector<btScalar>> Z;
 	std::vector<std::vector<int>> C;
 };
 
 struct output{
 
 
-	std::vector<std::vector<float>> Mx;
-	std::vector<std::vector<float>> My;
-	std::vector<std::vector<float>> Mz;
-	std::vector<std::vector<float>> Fx;
-	std::vector<std::vector<float>> Fy;
-	std::vector<std::vector<float>> Fz;
+	std::vector<std::vector<btScalar>> Mx;
+	std::vector<std::vector<btScalar>> My;
+	std::vector<std::vector<btScalar>> Mz;
+	std::vector<std::vector<btScalar>> Fx;
+	std::vector<std::vector<btScalar>> Fy;
+	std::vector<std::vector<btScalar>> Fz;
 
 	std::vector<kinematic_data> Q;
 
-	std::vector<float> T;
+	std::vector<btScalar> T;
 
 	std::vector<std::string> names;
 
@@ -65,7 +65,7 @@ struct output{
 			w_data.name = whiskernames[w];
 			Q.push_back(w_data);
 		}
-	
+
 	};
 };
 
@@ -75,9 +75,9 @@ void save_data(output* data, std::string filename = "../output/test");
 
 void read_csv_string(std::string fileName, std::vector<std::string> &dataList);
 void read_csv_int(std::string fileName, std::vector<std::vector<int> > &dataList);
-void read_csv_float(std::string fileName, std::vector<std::vector<float> > &dataList);
+void read_csv_float(std::string fileName, std::vector<std::vector<btScalar> > &dataList);
 
-void write_2D_float_csv(std::string filename, std::vector<std::vector<float>> data);
+void write_2D_float_csv(std::string filename, std::vector<std::vector<btScalar>> data);
 void write_2D_int_csv(std::string filename, std::vector<std::vector<int>> data);
 void write_1D_string_csv(std::string filename, std::vector<std::string> data);
 

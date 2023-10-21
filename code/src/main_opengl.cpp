@@ -81,14 +81,14 @@ static b3MouseButtonCallback sOldMouseButtonCB = 0;
 static b3KeyboardCallback sOldKeyboardCB = 0;
 //static b3RenderCallback sOldRenderCB = 0;
 
-float gWidth = 1024;
-float gHeight = 768;
+btScalar gWidth = 1024;
+btScalar gHeight = 768;
 
 Simulation*    simulation;
 int gSharedMemoryKey=-1;
 
 b3MouseMoveCallback prevMouseMoveCallback = 0;
-static void OnMouseMove( float x, float y)
+static void OnMouseMove( btScalar x, btScalar y)
 {
 	bool handled = false;
 	handled = simulation->mouseMoveCallback(x,y);
@@ -101,7 +101,7 @@ static void OnMouseMove( float x, float y)
 }
 
 b3MouseButtonCallback prevMouseButtonCallback  = 0;
-static void OnMouseDown(int button, int state, float x, float y) {
+static void OnMouseDown(int button, int state, btScalar x, btScalar y) {
 	bool handled = false;
 
 	handled = simulation->mouseButtonCallback(button, state, x,y);
@@ -154,13 +154,11 @@ int main(int argc, char** argv)
 						  << desc << std::endl;
 				return 0;
 			}
-			std::cout << "ARG  = " << parameters_fn << "\n";
 			Parameters parameters;
 			for (std::string fn : split(parameters_fn, ',')) {
 				std::cout << "Reading parameters from file: " << fn << std::endl;
   				parameters = mergeNodes(parameters, read_parameters_from_file(fn));
 			}
-
 
 			SimpleOpenGL3App* app = new SimpleOpenGL3App("Bullet Whisker Simulation",1024,768,true);
 
@@ -267,9 +265,8 @@ int main(int argc, char** argv)
 				app->swapBuffer();
 			} while (!app->m_window->requestedExit() && !(exitFlag || simulation->exitSim));
 
-			std::cout << "Saving data..." << std::endl;
 			if (parameters["SAVE"].as< bool >()) {
-				std::cout << "Simualtion terminated." << std::endl;
+				std::cout << "Saving data..." << std::endl;
 				output* results = simulation->get_results();
 				const string output_dir = parameters["dir_out"].as< string >();
 				save_data(results, output_dir);

@@ -29,13 +29,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "Bullet3Common/b3HashMap.h"
 #include "Bullet3Common/b3FileUtils.h"
 
-static double gUrdfDefaultCollisionMargin;
+static btScalar gUrdfDefaultCollisionMargin;
 
 
 btCollisionShape* createConvexHullFromShapes(std::vector<tinyobj::shape_t>& shapes, const btVector3& geomScale)
 {
-	// Author: Dirk Mittler 
-	// Copyright (C) 2015 Google   http://dirkmittler.homeip.net/blend4web_ce/uranium/bullet/examples/Importers/ImportURDFDemo/ 
+	// Author: Dirk Mittler
+	// Copyright (C) 2015 Google   http://dirkmittler.homeip.net/blend4web_ce/uranium/bullet/examples/Importers/ImportURDFDemo/
 
 	btCompoundShape* compound = new btCompoundShape();
 	compound->setMargin(gUrdfDefaultCollisionMargin);
@@ -57,7 +57,7 @@ btCollisionShape* createConvexHullFromShapes(std::vector<tinyobj::shape_t>& shap
 			pt.setValue(shape.mesh.positions[shape.mesh.indices[f] * 3 + 0],
 				shape.mesh.positions[shape.mesh.indices[f] * 3 + 1],
 				shape.mesh.positions[shape.mesh.indices[f] * 3 + 2]);
-			
+
 			convexHull->addPoint(pt*geomScale,false);
 
 			pt.setValue(shape.mesh.positions[shape.mesh.indices[f + 1] * 3 + 0],
@@ -80,7 +80,7 @@ btCollisionShape* createConvexHullFromShapes(std::vector<tinyobj::shape_t>& shap
 }
 
 btCollisionShape* LoadShapeFromObj(const char* relativeFileName, const char* materialPrefixPath, const btVector3& geomScale){
-	
+
 	// Author: Erwin Coumans
 	// Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 

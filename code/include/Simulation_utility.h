@@ -71,14 +71,14 @@ static int baseCollidesWith = COL_NOTHING;
 static int follicleCollidesWith = COL_NOTHING;
 
 btCollisionShape* createSphereShape(btScalar radius);
-btRigidBody* createDynamicBody(float mass,float friction,  const btTransform& startTransform, btCollisionShape* shape, GUIHelperInterface* m_guiHelper,  btVector4 color=btVector4(1,1,1,1),btScalar restitution=1.);
+btRigidBody* createDynamicBody(btScalar mass, btScalar friction, const btTransform& startTransform, btCollisionShape* shape, GUIHelperInterface* m_guiHelper,  btVector4 color=btVector4(1,1,1,1),btScalar restitution=1.);
 
 void translateFrame(btTransform& transform, btVector3 origin=btVector3(0.,0.,0.));
 void rotateFrame(btTransform& transform, btVector3 rotation=btVector3(0.,0.,0.));
 
-btTransform rotX(float angle);
-btTransform rotY(float angle);
-btTransform rotZ(float angle);
+btTransform rotX(btScalar angle);
+btTransform rotY(btScalar angle);
+btTransform rotZ(btScalar angle);
 btTransform createFrame(btVector3 origin=btVector3(0.,0.,0.), btVector3 rotation=btVector3(0.,0.,0.));
 
 #endif //SIMULATION_UTILITY_H
