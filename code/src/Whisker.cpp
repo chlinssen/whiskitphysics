@@ -248,8 +248,8 @@ void Whisker::initPhysics(btDiscreteDynamicsWorld* m_dynamicsWorld, btRigidBody*
 		    btTransform frameInCurr = createFrame(btVector3(-link_length/2.f,0,0),btVector3(0,0,0));
 
             // create link (between links) constraint
-            // btGeneric6DofSpringConstraint* spring = new btGeneric6DofSpringConstraint(*link_prev, *link, frameInPrev,frameInCurr, true);
-            btGeneric6DofSpring2Constraint* spring = new btGeneric6DofSpring2Constraint(*link_prev, *link, frameInPrev,frameInCurr);
+            btGeneric6DofSpringConstraint* spring = new btGeneric6DofSpringConstraint(*link_prev, *link, frameInPrev,frameInCurr, true);
+            //btGeneric6DofSpring2Constraint* spring = new btGeneric6DofSpring2Constraint(*link_prev, *link, frameInPrev,frameInCurr);
 
             // set spring parameters of node
             // ----------------------------------------------------------
