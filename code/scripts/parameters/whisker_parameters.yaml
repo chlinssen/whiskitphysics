@@ -6,7 +6,7 @@ WHISKER_NAMES: ["RC0", "RC1", "RB1", "RD1", "LC0", "LC1", "LB1", "LD1"] # select
 # 				 "RD0", "RD1", "RD2", "RD3", "RD4", "RD5", "RD6",
 # 				 "RE1", "RE2", "RE3", "RE4", "RE5", "RE6"
 
-BLOW: true				# increase whisker diameter for better visualization (will affect dynamics!!)
+BLOW: 1.				# increase whisker diameter for better visualization (will affect dynamics!!)
 NO_MASS: false			# disable mass of bodies
 NO_WHISKERS: false		# disable whiskers
 NUM_LINKS: 20			# set number of links

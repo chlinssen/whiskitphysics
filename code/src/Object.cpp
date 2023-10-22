@@ -24,7 +24,7 @@ Copyright (c) 2015 Google Inc. http://bulletphysics.org
 #include "Object.h"
 
 Object::Object(GUIHelperInterface* helper, btAlignedObjectArray<btCollisionShape*>* shapes, btTransform trans,
-	std::string filename, btVector4 color, float scaling, float mass, int colGroup, int colMask){
+	std::string filename, btVector4 color, btScalar scaling, btScalar mass, int colGroup, int colMask){
 
 	guiHelper = helper;
 	collisionGroup = colGroup;
@@ -87,9 +87,9 @@ void Object::calcExtremes(){
 	else{
 		int num_point = hull->getNumPoints();
 
-		float x = 0;
-		float y = 0;
-		float z = 0;
+		btScalar x = 0;
+		btScalar y = 0;
+		btScalar z = 0;
 
 		for (int i=0;i<num_point;i++){
 			btVector3 curr_point = transform*hull->getScaledPoint(i);
@@ -112,7 +112,7 @@ void Object::calcExtremes(){
 
 // function to add objects (point clouds) as rigid bodies
 btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
-	btVector3 position, btQuaternion orientation, btScalar mass, float scaling_factor, GUIHelperInterface* m_guiHelper,
+	btVector3 position, btQuaternion orientation, btScalar mass, btScalar scaling_factor, GUIHelperInterface* m_guiHelper,
 	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes){
 
 
@@ -124,7 +124,7 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 	hull->setMargin(0.1);
 
     int num_point = hull->getNumPoints();
-	float s;
+	btScalar s;
 	if (scaling_factor != 0.){
 		btVector3* all_point_list = hull->getUnscaledPoints();
 		btVector3 min_vec(0., 0., 0.), max_vec(0., 0., 0.);
@@ -137,7 +137,7 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 					max_vec[j] = curr_point[j];
 			}
 		}
-		float scale_new = scaling_factor/(max_vec - min_vec).norm();
+		btScalar scale_new = scaling_factor/(max_vec - min_vec).norm();
 		s = scale_new;
 	} else {
 		s = 1;
@@ -162,8 +162,10 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 																	B3_GL_TRIANGLES, -1);
 
 	btTransform bodyTransform = body->getCenterOfMassTransform();
-
-    int renderInstance = m_guiHelper->registerGraphicsInstance(shapeId,bodyTransform.getOrigin(),bodyTransform.getRotation(),color,scaling);
+	const float _color[4] = {color[0], color[1], color[2], color[3]};
+	const float _origin[3] = {bodyTransform.getOrigin()[0], bodyTransform.getOrigin()[1], bodyTransform.getOrigin()[2]};
+	const float _rotation[3] = {bodyTransform.getRotation()[0], bodyTransform.getRotation()[1], bodyTransform.getRotation()[2]};
+    int renderInstance = m_guiHelper->registerGraphicsInstance(shapeId,_origin,_rotation,_color,scaling);
 	body->setUserIndex(renderInstance);
 
     return body;
@@ -172,10 +174,10 @@ btRigidBody* Object::obj2DynamicBody(std::string fileName,btVector4 color,
 
 // function to add objects (point clouds) as rigid bodies
 btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
-	btVector3 position, btQuaternion orientation, btScalar mass, float scaling_factor, GUIHelperInterface* m_guiHelper,
+	btVector3 position, btQuaternion orientation, btScalar mass, btScalar scaling_factor, GUIHelperInterface* m_guiHelper,
 	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes){
 
-
+	const float _color[4] = {color[0], color[1], color[2], color[3]};
     GLInstanceGraphicsShape* glmesh = LoadMeshFromObj(fileName.c_str(), "");
     printf("[INFO] Static obj loaded: Extracted %d vertices from obj file [%s]\n", glmesh->m_numvertices, fileName.c_str());
 
@@ -185,7 +187,7 @@ btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 
     int num_point = hull->getNumPoints();
 
-	float s;
+	btScalar s;
 	if (scaling_factor != 0.){
 		btVector3* all_point_list = hull->getUnscaledPoints();
 		btVector3 min_vec, max_vec;
@@ -198,7 +200,7 @@ btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
 					max_vec[j] = curr_point[j];
 			}
 		}
-		float scale_new = scaling_factor/(max_vec - min_vec).norm();
+		btScalar scale_new = scaling_factor/(max_vec - min_vec).norm();
 		s = scale_new;
 	} else {
 		s = 1;
@@ -225,8 +227,12 @@ btRigidBody* Object::obj2StaticBody(std::string fileName,btVector4 color,
                                                                     glmesh->m_numIndices,
 																	B3_GL_TRIANGLES, -1);
 
+
 	btTransform bodyTransform = body->getCenterOfMassTransform();
-    int renderInstance = m_guiHelper->registerGraphicsInstance(shapeId,bodyTransform.getOrigin(),bodyTransform.getRotation(),color,scaling);
+	const float _origin[3] = {bodyTransform.getOrigin()[0], bodyTransform.getOrigin()[1], bodyTransform.getOrigin()[2]};
+	const float _rotation[3] = {bodyTransform.getRotation()[0], bodyTransform.getRotation()[1], bodyTransform.getRotation()[2]};
+
+    int renderInstance = m_guiHelper->registerGraphicsInstance(shapeId,_origin,_rotation,_color,scaling);
 
 	body->setUserIndex(renderInstance);
 

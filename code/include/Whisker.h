@@ -44,9 +44,9 @@ struct whisker_config{
 	int side;
 	int row;
 	int col;
-	float L;
-	float a;
-	std::vector<float> link_angles;
+	btScalar L;
+	btScalar a;
+	std::vector<btScalar> link_angles;
 	btVector3 base_pos;
 	btVector3 base_rot;
 };
@@ -82,17 +82,17 @@ private:
 	btGeneric6DofSpringConstraint* baseConstraint;
 	btJointFeedback baseFeedback;
 
-	float m_time;
-	float m_angle;
+	btScalar m_time;
+	btScalar m_angle;
 	bool ACTIVE;
 	bool NO_MASS;
-	bool BLOW; //for visual clearity
+	btScalar BLOW; //for visual clearity
 	int PRINT;
 
 	std::vector<int> collide;
 
 	// Whisker general configuration parameters
-	float friction;
+	btScalar friction;
 	btScalar mass;
 	btScalar dt;
 	int NUM_LINKS;
@@ -141,14 +141,14 @@ public:
 
 	int idx;
 
-	std::vector<float> getX();
-	std::vector<float> getY();
-	std::vector<float> getZ();
+	std::vector<btScalar> getX();
+	std::vector<btScalar> getY();
+	std::vector<btScalar> getZ();
 	std::vector<int> getCollision();
 
 	btTransform head2origin;
 
-	double base_stiffness;
+	btScalar base_stiffness;
 };
 
 

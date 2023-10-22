@@ -32,10 +32,11 @@ btVector4 YELLOW = btVector4(1.,1.,0.0,1);
 btVector4 ORANGE = btVector4(1.,0.647,0.0,1);
 
 void Simulation::load_parameters(Parameters& parameters) {
-	TIME_STEP = parameters["TIME_STEP"].as< float >();
-	NUM_STEP_INT = parameters["NUM_STEP_INT"].as< int >();
+	TIME_STEP = parameters["TIME_STEP"].as< btScalar >();
 	NUM_STEP_SOLVER = parameters["NUM_STEP_SOLVER"].as< int >();
-	TIME_STOP = parameters["TIME_STOP"].as< float >();
+	NUM_STEP_INT = parameters["NUM_STEP_INT"].as< int >();
+	TIME_STOP = parameters["TIME_STOP"].as< btScalar >();
+	NUM_STEP_SOLVER = parameters["NUM_STEP_SOLVER"].as< int >();
 	NO_WHISKERS = parameters["NO_WHISKERS"].as< bool >();
 	SAVE = parameters["SAVE"].as< bool >();
 	ACTIVE = parameters["ACTIVE"].as< bool >();
@@ -43,20 +44,20 @@ void Simulation::load_parameters(Parameters& parameters) {
 	DEBUG = parameters["DEBUG"].as< int >();
 	PRINT = parameters["PRINT"].as< int >();
 
-	camPos = parameters["CPOS"].as< std::vector< float > >();
-	camDist = parameters["CDIST"].as< float >();
-	camPitch = parameters["CPITCH"].as< float >();
-	camYaw = parameters["CYAW"].as< float >();
+	camPos = parameters["CPOS"].as< std::vector< btScalar > >();
+	camDist = parameters["CDIST"].as< btScalar >();
+	camPitch = parameters["CPITCH"].as< btScalar >();
+	camYaw = parameters["CYAW"].as< btScalar >();
 
 	file_whisking_angle = parameters["file_whisking_angle"].as< std::string >();
 	WHISKER_PARAMS_DIR = parameters["WHISKER_PARAMS_DIR"].as< std::string >();
 	dir_rathead_trajectory = parameters["dir_rathead_trajectory"].as< std::string >();
 
-	gravity = parameters["gravity"].as< std::vector< float > >();
+	gravity = parameters["gravity"].as< std::vector< btScalar > >();
 
 	OBJECT = parameters["OBJECT"].as< int >();
-	PEG_LOC = parameters["PEG_LOC"].as< std::vector< float > >();
-	PEG_SPEED = parameters["PEG_SPEED"].as< float >();
+	PEG_LOC = parameters["PEG_LOC"].as< std::vector< btScalar > >();
+	PEG_SPEED = parameters["PEG_SPEED"].as< btScalar >();
 	file_env = parameters["file_env"].as< std::string >();
 
 	// get whiskers to simulate
@@ -291,11 +292,14 @@ void Simulation::initPhysics()
 
 		read_csv_float(dir_param + file_whisking_angle, whisker_vel);
 
+		std::cout << "Read " << whisker_vel[0].size() / 3 << " datapoints\n";
+
 		TIME_STOP = std::min(TIME_STOP, (whisker_vel[0].size()/3 - 1) * TIME_STEP);
 	}
 
 	// if exploring, load data for rat head trajectory
 	if (EXPLORING){
+		std::cout << "Reading rat head trajectory from " << dir_rathead_trajectory << "\n";
 		read_csv_float(dir_rathead_trajectory, HEAD_LOC_VEL);
 	}
 
