@@ -16,6 +16,7 @@ E: 5e9				# set young's modulus (GPa) at whisker base
 ZETA: 0.32			# set damping coefficient zeta at whisker base
 friction: .5
 base_stiffness: 1.25
+base_damping: 0.2
 
 # rat position/orientation parameters
 dir_rathead: "data/object/NewRatHead.obj"

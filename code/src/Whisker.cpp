@@ -38,6 +38,7 @@ Whisker::Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionSh
 	PRINT = parameters["PRINT"].as< int >();
 	NUM_LINKS = parameters["NUM_LINKS"].as< unsigned int >();
 	base_stiffness = parameters["base_stiffness"].as< double >();
+	base_damping = parameters["base_damping"].as< double >();
 	NUM_JOINTS = NUM_LINKS - 1;
 
 	// initialize collide array
@@ -230,12 +231,12 @@ void Whisker::initPhysics(btDiscreteDynamicsWorld* m_dynamicsWorld, btRigidBody*
 
 			baseConstraint->enableSpring(4,true);
 			baseConstraint->setStiffness(4, base_stiffness);
-			baseConstraint->setDamping(4,0.2);
+			baseConstraint->setDamping(4, base_damping);
 			baseConstraint->setEquilibriumPoint(4,0);
 
 			baseConstraint->enableSpring(5,true);
-			baseConstraint->setStiffness(5,1.25);
-			baseConstraint->setDamping(5,0.2);
+			baseConstraint->setStiffness(5, base_stiffness);
+			baseConstraint->setDamping(5, base_damping);
 			baseConstraint->setEquilibriumPoint(5,0);
 
 			// enable feedback of base constraint to read out mechanics
