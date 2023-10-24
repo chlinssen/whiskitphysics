@@ -149,6 +149,7 @@ public:
 	btTransform head2origin;
 
 	double base_stiffness;
+	double base_damping;
 };
 
 
