@@ -34,7 +34,7 @@ Whisker::Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionSh
 
 	ACTIVE = parameters["ACTIVE"].as< bool >();
 	NO_MASS = parameters["NO_MASS"].as< bool >();
-	BLOW = parameters["BLOW"].as< bool >();
+	BLOW = parameters["BLOW"].as< double >();
 	PRINT = parameters["PRINT"].as< int >();
 	NUM_LINKS = parameters["NUM_LINKS"].as< unsigned int >();
 	base_stiffness = parameters["base_stiffness"].as< double >();
@@ -103,8 +103,8 @@ void Whisker::initPhysics(btDiscreteDynamicsWorld* m_dynamicsWorld, btRigidBody*
 
     /// WHISKER BASE
 	/// This is a sphere shape that has exactly the same transform as the basepoint (box).
-	/// In non-whisking mode, it's body frame is axis-aligned. In whisking mode, this node
-	/// serves as a moving node that receives angular velocity parameter from Knutsen.
+	/// In non-whisking mode, its body frame is axis-aligned. In whisking mode, this node
+	/// serves as a moving node that receives angular velocity parameter
 
 	// Now, basepointTransform become the absolute transform of the basepoint
 	btTransform baseTransform = basepoint->getCenterOfMassTransform();
@@ -460,7 +460,7 @@ whisker_config Whisker::get_config(std::string wname,Parameters& parameters){
     std::vector<std::vector<float>> whisker_bp_angles;
 
 	const std::string dir_param = parameters["WHISKER_PARAMS_DIR"].as< std::string >();
-	std::cout << "Loading whisker parameters from:  " << dir_param << std::endl;
+	std::cout << "Loading whisker parameters from: " << dir_param << std::endl;
     read_csv_string(dir_param + "param_name.csv",whisker_names);
     read_csv_int(dir_param +"param_side_row_col.csv",whisker_pos);
     read_csv_float(dir_param +"param_s_a.csv",whisker_geom);
