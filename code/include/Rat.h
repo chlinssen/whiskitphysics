@@ -48,6 +48,7 @@ public:
 	void initPhysics(btDiscreteDynamicsWorld* world);
 
 	Whisker* getWhisker(int index);
+	size_t getWhiskerArraySize();
 
 	void setLinearVelocity(btVector3 position);
 	void setAngularVelocity(btVector3 rotation);

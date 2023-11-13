@@ -177,6 +177,7 @@ int main(int argc, char** argv)
 			simulation->load_parameters(parameters);
 			simulation->initPhysics();
 			simulation->resetCamera();
+			simulation->init_socket();
 			char fileName[1024];
 			int textureWidth = 128;
 			int textureHeight = 128;

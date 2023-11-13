@@ -30,6 +30,12 @@ Copyright (c) 2015 Google Inc. http://bulletphysics.org
 #include "Simulation_IO.h"
 
 #include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h> // Add this include for inet_pton
 #include <chrono>
 #include <iomanip>      // std::setprecision
 
@@ -40,6 +46,11 @@ Copyright (c) 2015 Google Inc. http://bulletphysics.org
 #include "CommonInterfaces/CommonRigidBodyBase.h"
 #include "CommonInterfaces/CommonGUIHelperInterface.h"
 #include "CommonInterfaces/CommonParameterInterface.h"
+
+#include "../jsonlib/json.hpp"
+
+using json = nlohmann::json;
+
 
 class Simulation* SimulationCreateFunc(struct CommonExampleOptions& options);
 
@@ -58,7 +69,12 @@ public:
 
 	bool exitSim;
 
+    int init_socket();
 private:
+    const int SOCKET_PORT = 12346;
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+
 	btScalar m_time_elapsed;
 	btScalar m_time;
 	int m_step;

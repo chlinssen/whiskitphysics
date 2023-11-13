@@ -31,6 +31,34 @@ btVector4 GREY = btVector4(0.,0.,0.0,0.5);
 btVector4 YELLOW = btVector4(1.,1.,0.0,1);
 btVector4 ORANGE = btVector4(1.,0.647,0.0,1);
 
+
+int Simulation::init_socket() {
+    // Create socket
+    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientSocket == -1) {
+        std::cerr << "Error creating socket" << std::endl;
+        return 1;
+    }
+
+    // Configure server address
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(SOCKET_PORT);
+
+    // Convert IP address from string to network format
+    if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+        std::cerr << "Invalid address/Address not supported" << std::endl;
+        return 1;
+    }
+
+    // Connect to the server
+    if (connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1) {
+        std::cerr << "Error connecting to server" << std::endl;
+        return 1;
+    }
+
+	return 0;
+}
+
 void Simulation::load_parameters(Parameters& parameters) {
 	TIME_STEP = parameters["TIME_STEP"].as< float >();
 	NUM_STEP_INT = parameters["NUM_STEP_INT"].as< int >();
@@ -129,6 +157,45 @@ void Simulation::stepSimulation(){
 
 		// register collisions
 		rat->detect_collision(m_dynamicsWorld);
+
+
+		// wait for "muscle control" from neural network script -- this is a blocking operation (wait until packet is received)
+                // char buffer[1024];
+                char buffer[10024];
+                memset(buffer, 0, sizeof(buffer));
+                recv(clientSocket, buffer, sizeof(buffer), 0);
+                std::cout << "Received data from neural network script: " << buffer << std::endl;
+		// decoding data received and do something with it -- for later
+
+		json data_for_all_whiskers;
+
+		for (size_t i = 0; i < rat->getWhiskerArraySize(); ++i) {
+			const std::string w_name = rat->getWhisker(i)->getWhiskerName();
+			const btVector3 force_from_whisker = rat->getWhisker(i)->getForces();
+			const btVector3 torque_from_whisker = rat->getWhisker(i)->getTorques();
+
+			json force = json::array();
+			force.push_back(force_from_whisker[0]);
+			force.push_back(force_from_whisker[1]);
+			force.push_back(force_from_whisker[2]);
+			json torque = json::array();
+			torque.push_back(torque_from_whisker[0]);
+			torque.push_back(torque_from_whisker[1]);
+			torque.push_back(torque_from_whisker[2]);
+			json whisker_data;
+			whisker_data["force"] = force;
+			whisker_data["torque"] = torque;
+			data_for_all_whiskers[w_name] = whisker_data;
+		}
+
+		json data;
+		data["time"] = m_time,
+		data["whiskers"] = data_for_all_whiskers;
+
+		std::cout << "Sending message: " << data << "...\n";
+		std::string jsonData = data.dump();
+		send(clientSocket, jsonData.c_str(), jsonData.size(), 0);
+
 
 		// first, push back data into data_dump
 		if(!NO_WHISKERS && SAVE) {

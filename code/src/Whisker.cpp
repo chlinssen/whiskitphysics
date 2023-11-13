@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 Whisker::Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionShape* >* shapes, std::string w_name, Parameters& parameters, btTransform head2origin) {
 	color = btVector4(0.1, 0.1, 0.1, 1);
 
+	this->w_name = w_name;
 	this->head2origin = head2origin;
 
 	// save parameters and global variables to whisker object
@@ -69,6 +70,10 @@ Whisker::Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionSh
 	rho_slope = ((parameters["RHO_TIP"].as< double >() - parameters["RHO_BASE"].as< double >())/length / pow(SCALE,3)) ;
 	zeta = parameters["ZETA"].as< double >();				// zeta: damping ratio
 	E = parameters["E"].as< double >() / SCALE;			// E: Young's modulus, SCALE: convert kg/m/s2 to kg/mm/s2
+}
+
+std::string Whisker::getWhiskerName() {
+	return w_name;
 }
 
 void Whisker::initPhysics(btDiscreteDynamicsWorld* m_dynamicsWorld, btRigidBody* head) {
