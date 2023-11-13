@@ -167,7 +167,7 @@ void Simulation::stepSimulation(){
                 std::cout << "Received data from neural network script: " << buffer << std::endl;
 		// decoding data received and do something with it -- for later
 
-		json data_for_all_whiskers = json::array();
+		json data_for_all_whiskers;
 
 		for (size_t i = 0; i < rat->getWhiskerArraySize(); ++i) {
 			const std::string w_name = rat->getWhisker(i)->getWhiskerName();
@@ -182,13 +182,15 @@ void Simulation::stepSimulation(){
 			torque.push_back(torque_from_whisker[0]);
 			torque.push_back(torque_from_whisker[1]);
 			torque.push_back(torque_from_whisker[2]);
-			json whisker_data = {w_name, {"force", force,
-                                          "torque", torque}};
-			data_for_all_whiskers.push_back(whisker_data);
+			json whisker_data;
+			whisker_data["force"] = force;
+			whisker_data["torque"] = torque;
+			data_for_all_whiskers[w_name] = whisker_data;
 		}
 
-		json data = {"time", m_time,
-		             "whiskers", data_for_all_whiskers};
+		json data;
+		data["time"] = m_time,
+		data["whiskers"] = data_for_all_whiskers;
 
 		std::cout << "Sending message: " << data << "...\n";
 		std::string jsonData = data.dump();
