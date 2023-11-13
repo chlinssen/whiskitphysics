@@ -65,6 +65,7 @@ struct link_data
 class Whisker
 {
 private:
+	std::string w_name;
 	btVector4 color;
 	btAlignedObjectArray<btCollisionShape*>* m_collisionShapes;
 	GUIHelperInterface* m_guiHelper;
@@ -129,6 +130,8 @@ public:
 	Whisker(GUIHelperInterface* helper, btAlignedObjectArray< btCollisionShape* >* shapes, std::string w_name, Parameters& parameters, btTransform head2origin);
 	~Whisker(){}
 	void initPhysics(btDiscreteDynamicsWorld* world, btRigidBody* head);
+
+	std::string getWhiskerName();
 
 	void whisk(btScalar a_vel_0, btScalar a_vel_1, btScalar a_vel_2, btVector3 headAngularVelocity);
 

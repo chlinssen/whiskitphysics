@@ -65,6 +65,10 @@ Whisker* Rat::getWhisker(int index){
 	return m_whiskerArray[index];
 }
 
+size_t Rat::getWhiskerArraySize() {
+	return m_whiskerArray.size();
+}
+
 const btVector3 Rat::getPosition(){
 	return rathead->body->getCenterOfMassPosition();
 }
