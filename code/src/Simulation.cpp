@@ -165,8 +165,10 @@ void Simulation::stepSimulation(){
                 memset(buffer, 0, sizeof(buffer));
                 recv(clientSocket, buffer, sizeof(buffer), 0);
                 std::cout << "Received data from neural network script: " << buffer << std::endl;
-		// decoding data received and do something with it -- for later
+		// decoding data received
+                json recv_data = nlohmann::json::parse(buffer);
 
+		// data to send back to the neural network script
 		json data_for_all_whiskers;
 
 		for (size_t i = 0; i < rat->getWhiskerArraySize(); ++i) {
@@ -214,7 +216,8 @@ void Simulation::stepSimulation(){
 
 		// move array if in ACTIVE mode
 		if(ACTIVE && !NO_WHISKERS){
-			rat->whisk(m_step, whisker_vel);
+			rat->whisk(recv_data["active_whisking_data"]);
+			//rat->whisk(m_step, whisker_vel);
 		}
 
 		// move rat head if in EXPLORING mode
