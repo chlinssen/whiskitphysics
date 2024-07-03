@@ -94,6 +94,7 @@ const btVector3 Rat::getAngularVelocity(){
 	return rathead->body->getAngularVelocity();
 }
 
+/*
 void Rat::whisk(int step, std::vector<std::vector<float>> whisker_vel){
 
 	// total number of steps in one cycle of whisking phase
@@ -108,6 +109,21 @@ void Rat::whisk(int step, std::vector<std::vector<float>> whisker_vel){
 		m_whiskerArray[i]->whisk(a_vel_0, a_vel_1, a_vel_2, getAngularVelocity());
 	}
 }
+*/
+void Rat::whisk(json angular_velocity_json){
+
+	// for every whisker, read its angular velocity at this step
+	for (int i=0; i < m_whiskerArray.size(); ++i) {
+		const std::string wname = m_whiskerArray[i]->getWhiskerName();
+		std::cout << wname << "\n";
+		btScalar a_vel_0 = angular_velocity_json[wname][0];
+		btScalar a_vel_1 = angular_velocity_json[wname][1];
+		btScalar a_vel_2 = angular_velocity_json[wname][2];
+		std:cout << "\t-> " << a_vel_0 << ", " << a_vel_1 << ", " << a_vel_2 << "\n";
+		m_whiskerArray[i]->whisk(a_vel_0, a_vel_1, a_vel_2, getAngularVelocity());
+	}
+}
+
 
 // function to retrieve torques at base points
 void Rat::dump_M(output* data){

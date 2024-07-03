@@ -12,8 +12,24 @@ import time
 
 
 def handle_client(client_socket):
+
     # send a packet
-    response_data = {'message' : 'JSON data received'}
+    current_time_ms = float(time.time())
+    f = .2  # [Hz]
+
+    whisker_names = ["RA0", "RA1", "RA2", "RA3", "RA4", "RB0", "RB1", "RB2", "RB3", "RB4",
+                                    "RC0", "RC1", "RC2", "RC3", "RC4", "RC5", "RC6",
+                                "RD0", "RD1", "RD2", "RD3", "RD4", "RD5", "RD6",
+                                "RE1", "RE2", "RE3", "RE4", "RE5", "RE6"]
+
+
+    response_data = {"active_whisking_data": {}}
+    for whisker_name in whisker_names:
+        response_data["active_whisking_data"][whisker_name] = [0,
+                                                               20*np.sin(2 * np.pi * f * current_time_ms),
+                                                               0,#10*np.sin(2 * np.pi * f * current_time_ms),
+                                                               #0,#10*np.sin(2 * np.pi * f * current_time_ms)
+                                                               ]
     response_json = json.dumps(response_data)
     client_socket.send(response_json.encode('utf-8'))
 
@@ -29,7 +45,7 @@ def handle_client(client_socket):
 def main():
     host = '127.0.0.1'
     port = 12346
-    
+
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
     server_socket.listen(1)
@@ -42,6 +58,6 @@ def main():
             handle_client(client_socket)
 
     server_socket.close()
-    
+
 if __name__ == "__main__":
     main()
